@@ -8,6 +8,9 @@ export enum OverlayEventType {
   ThreadsChanged = 'overlay:threads-changed',
   MessagesChanged = 'overlay:messages-changed',
   LabelsChanged = 'overlay:labels-changed',
+  SyncStarted = 'overlay:sync-started',
+  SyncCompleted = 'overlay:sync-completed',
+  SyncFailed = 'overlay:sync-failed',
 }
 
 type Handler = () => void;

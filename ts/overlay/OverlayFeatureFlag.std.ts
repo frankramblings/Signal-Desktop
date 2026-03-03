@@ -8,9 +8,11 @@
 // Default is OFF for all build types; toggle via dev settings or tests.
 
 const FLAG_KEY = 'overlayThreadsEnabled';
+const SYNC_FLAG_KEY = 'overlayCloudSyncEnabled';
 
-// Module-level override, used in tests and dev builds.
+// Module-level overrides, used in tests and dev builds.
 let _override: boolean | null = null;
+let _syncOverride: boolean | null = null;
 
 /**
  * Returns true when the overlay threads feature is enabled.
@@ -59,4 +61,48 @@ export function setOverlayThreadsEnabledForTesting(
   value: boolean | null
 ): void {
   _override = value;
+}
+
+// ─── CloudKit sync feature flag ──────────────────────────────────────────────
+
+/**
+ * Returns true when CloudKit sync for overlay data is enabled.
+ * Requires overlayThreadsEnabled to also be true.
+ */
+export function isOverlayCloudSyncEnabled(): boolean {
+  if (!isOverlayThreadsEnabled()) {
+    return false;
+  }
+
+  if (_syncOverride !== null) {
+    return _syncOverride;
+  }
+
+  if (
+    typeof window !== 'undefined' &&
+    window.storage &&
+    typeof window.storage.get === 'function'
+  ) {
+    return window.storage.get(SYNC_FLAG_KEY, false) === true;
+  }
+
+  return false;
+}
+
+export async function setOverlayCloudSyncEnabled(
+  enabled: boolean
+): Promise<void> {
+  if (
+    typeof window !== 'undefined' &&
+    window.storage &&
+    typeof window.storage.put === 'function'
+  ) {
+    await window.storage.put(SYNC_FLAG_KEY, enabled);
+  }
+}
+
+export function setOverlayCloudSyncEnabledForTesting(
+  value: boolean | null
+): void {
+  _syncOverride = value;
 }

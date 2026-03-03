@@ -1179,6 +1179,58 @@
     "messageformat": "Untitled",
     "description": "Fallback display name for threads without a title"
   },
+  "icu:Overlay--sync-diagnostics-label": {
+    "messageformat": "Sync Diagnostics",
+    "description": "Accessible label for the sync diagnostics region"
+  },
+  "icu:Overlay--sync-diagnostics-title": {
+    "messageformat": "CloudKit Sync",
+    "description": "Title for the sync diagnostics panel"
+  },
+  "icu:Overlay--sync-status": {
+    "messageformat": "Status",
+    "description": "Label for sync status field"
+  },
+  "icu:Overlay--sync-status-idle": {
+    "messageformat": "Idle",
+    "description": "Sync status when not actively syncing"
+  },
+  "icu:Overlay--sync-status-syncing": {
+    "messageformat": "Syncing…",
+    "description": "Sync status when actively syncing"
+  },
+  "icu:Overlay--sync-status-error": {
+    "messageformat": "Error",
+    "description": "Sync status when last sync failed"
+  },
+  "icu:Overlay--sync-last-sync": {
+    "messageformat": "Last sync",
+    "description": "Label for last successful sync timestamp"
+  },
+  "icu:Overlay--sync-never": {
+    "messageformat": "Never",
+    "description": "Shown when sync has never completed"
+  },
+  "icu:Overlay--sync-last-error": {
+    "messageformat": "Last error",
+    "description": "Label for last sync error message"
+  },
+  "icu:Overlay--sync-threads-synced": {
+    "messageformat": "Threads synced",
+    "description": "Label for count of threads synced"
+  },
+  "icu:Overlay--sync-messages-synced": {
+    "messageformat": "Messages synced",
+    "description": "Label for count of messages synced"
+  },
+  "icu:Overlay--sync-now": {
+    "messageformat": "Sync Now",
+    "description": "Button label to trigger manual sync"
+  },
+  "icu:Overlay--sync-syncing": {
+    "messageformat": "Syncing…",
+    "description": "Button label shown during active sync"
+  },
   "icu:checkNetworkConnection": {
     "messageformat": "Check your network connection.",
     "description": "Obvious instructions for when a user's computer loses its network connection"
