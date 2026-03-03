@@ -481,4 +481,111 @@ describe('overlay/M1 — OverlayService flows', () => {
       assert.equal(overlay?.version, 2);
     });
   });
+
+  // ─── Undo via store operations (M2) ────────────────────────────────────
+
+  describe('undo via store operations', () => {
+    // Import undo manager lazily to avoid import issues in the M1 test
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    let overlayUndo: typeof import('../../overlay/services/OverlayUndoManager.dom.js')['overlayUndo'];
+
+    before(() => {
+      // eslint-disable-next-line global-require
+      overlayUndo =
+        require('../../overlay/services/OverlayUndoManager.dom.js').overlayUndo;
+    });
+
+    beforeEach(() => {
+      overlayUndo.clear();
+    });
+
+    it('undo restores a deleted thread and its message links', async () => {
+      const conversationId = 'conv-undo-svc';
+      const threadRef = 'thread-undo-svc';
+
+      createThreadOverlay(db, {
+        thread_ref: threadRef,
+        conversation_ref: conversationId,
+        title: 'Service undo thread',
+        is_pinned: true,
+      });
+
+      createMessageOverlay(db, {
+        id: generateUuid(),
+        message_ref: `${conversationId}:msg-su1`,
+        conversation_ref: conversationId,
+        thread_ref: threadRef,
+      });
+
+      // Snapshot before delete
+      const threadSnap = getThreadOverlay(db, threadRef)!;
+      const msgsSnap = getMessageOverlaysByThread(db, threadRef);
+
+      overlayUndo.push({
+        description: `Undo delete "${threadSnap.title}"`,
+        execute: async () => {
+          createThreadOverlay(db, {
+            thread_ref: threadSnap.thread_ref,
+            conversation_ref: threadSnap.conversation_ref,
+            title: threadSnap.title,
+            color: threadSnap.color,
+            is_pinned: threadSnap.is_pinned,
+          });
+          for (const msg of msgsSnap) {
+            updateMessageOverlay(db, msg.message_ref, {
+              thread_ref: threadRef,
+            });
+          }
+        },
+      });
+
+      deleteThreadOverlay(db, threadRef);
+      assert.isUndefined(getThreadOverlay(db, threadRef));
+
+      const entry = overlayUndo.pop();
+      assert.isNotNull(entry);
+      await entry!.execute();
+
+      const restored = getThreadOverlay(db, threadRef);
+      assert.isNotNull(restored);
+      assert.equal(restored!.title, 'Service undo thread');
+      assert.isTrue(restored!.is_pinned);
+      assert.lengthOf(getMessageOverlaysByThread(db, threadRef), 1);
+    });
+
+    it('undo restores a removed label', async () => {
+      const messageRef = 'conv-undo-lbl-svc:msg-l1';
+
+      createMessageOverlay(db, {
+        id: generateUuid(),
+        message_ref: messageRef,
+        conversation_ref: 'conv-undo-lbl-svc',
+        labels: ['alpha', 'beta'],
+      });
+
+      const removedLabel = 'beta';
+
+      overlayUndo.push({
+        description: `Undo remove label "${removedLabel}"`,
+        execute: async () => {
+          const current = getMessageOverlayByRef(db, messageRef);
+          if (current) {
+            updateMessageOverlay(db, messageRef, {
+              labels: [...current.labels, removedLabel],
+            });
+          }
+        },
+      });
+
+      updateMessageOverlay(db, messageRef, { labels: ['alpha'] });
+      let overlay = getMessageOverlayByRef(db, messageRef);
+      assert.deepEqual([...overlay!.labels], ['alpha']);
+
+      const entry = overlayUndo.pop();
+      await entry!.execute();
+
+      overlay = getMessageOverlayByRef(db, messageRef);
+      assert.include([...overlay!.labels], 'beta');
+    });
+  });
 });

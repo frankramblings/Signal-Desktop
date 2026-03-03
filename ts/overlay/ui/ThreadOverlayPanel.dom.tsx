@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // ThreadOverlayPanel: full panel showing thread list for a conversation,
-// with actions for pin/unpin, rename, and delete. Self-contained — calls
-// OverlayService directly.
+// with actions for pin/unpin, rename, and delete. Event-driven refresh.
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { ThreadOverlayType, MessageOverlayType } from '../models/OverlayTypes.std.js';
 import * as OverlayService from '../services/OverlayService.dom.js';
+import { overlayEvents, OverlayEventType } from '../services/OverlayEventBus.dom.js';
+import { OverlayErrorBanner } from './OverlayErrorBanner.dom.js';
+
+const { i18n } = window.SignalContext;
 
 export type ThreadOverlayPanelProps = {
   conversationId: string;
@@ -23,14 +26,19 @@ export const ThreadOverlayPanel = memo(function ThreadOverlayPanel({
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
-    const [t, m] = await Promise.all([
-      OverlayService.getThreadsForConversation(conversationId),
-      OverlayService.getMessageOverlaysForConversation(conversationId),
-    ]);
-    setThreads(t);
-    setMessageOverlays(m);
+    try {
+      const [t, m] = await Promise.all([
+        OverlayService.getThreadsForConversation(conversationId),
+        OverlayService.getMessageOverlaysForConversation(conversationId),
+      ]);
+      setThreads(t);
+      setMessageOverlays(m);
+    } catch {
+      setErrorMessage(i18n('icu:Overlay--error-generic'));
+    }
     setLoading(false);
   }, [conversationId]);
 
@@ -38,58 +46,88 @@ export const ThreadOverlayPanel = memo(function ThreadOverlayPanel({
     void loadData();
   }, [loadData]);
 
+  // Event-driven refresh
+  useEffect(() => {
+    const handler = () => void loadData();
+    overlayEvents.on(OverlayEventType.ThreadsChanged, handler);
+    overlayEvents.on(OverlayEventType.MessagesChanged, handler);
+    return () => {
+      overlayEvents.off(OverlayEventType.ThreadsChanged, handler);
+      overlayEvents.off(OverlayEventType.MessagesChanged, handler);
+    };
+  }, [loadData]);
+
   const handleCreateThread = useCallback(async () => {
     if (!newTitle.trim()) return;
-    await OverlayService.createThread({
-      conversationId,
-      title: newTitle.trim(),
-    });
-    setNewTitle('');
-    setShowCreate(false);
-    await loadData();
-  }, [newTitle, conversationId, loadData]);
+    try {
+      await OverlayService.createThread({
+        conversationId,
+        title: newTitle.trim(),
+      });
+      setNewTitle('');
+      setShowCreate(false);
+    } catch {
+      setErrorMessage(i18n('icu:Overlay--error-generic'));
+    }
+  }, [newTitle, conversationId]);
 
   const handleRename = useCallback(
     async (threadRef: string, title: string) => {
-      await OverlayService.updateThread(threadRef, { title });
-      await loadData();
+      try {
+        await OverlayService.updateThread(threadRef, { title });
+      } catch {
+        setErrorMessage(i18n('icu:Overlay--error-generic'));
+      }
     },
-    [loadData]
+    []
   );
 
   const handleTogglePin = useCallback(
     async (threadRef: string) => {
-      await OverlayService.togglePinThread(threadRef);
-      await loadData();
+      try {
+        await OverlayService.togglePinThread(threadRef);
+      } catch {
+        setErrorMessage(i18n('icu:Overlay--error-generic'));
+      }
     },
-    [loadData]
+    []
   );
 
   const handleDelete = useCallback(
     async (threadRef: string) => {
-      await OverlayService.deleteThread(threadRef);
-      await loadData();
+      try {
+        await OverlayService.deleteThread(threadRef);
+      } catch {
+        setErrorMessage(i18n('icu:Overlay--error-generic'));
+      }
     },
-    [loadData]
+    []
   );
 
   if (loading) {
     return (
       <div className="overlay-panel overlay-panel--loading">
-        Loading threads...
+        {i18n('icu:Overlay--loading')}
       </div>
     );
   }
 
   return (
     <div className="overlay-panel">
+      <OverlayErrorBanner
+        message={errorMessage}
+        onDismiss={() => setErrorMessage(null)}
+      />
+
       <div className="overlay-panel__header">
-        <h3 className="overlay-panel__title">Thread Overlays</h3>
+        <h3 className="overlay-panel__title">
+          {i18n('icu:Overlay--thread-overlays-title')}
+        </h3>
         <button
           type="button"
           className="overlay-panel__add-btn"
           onClick={() => setShowCreate(!showCreate)}
-          title="Create new thread"
+          aria-label={i18n('icu:Overlay--create-thread-button')}
         >
           +
         </button>
@@ -100,7 +138,7 @@ export const ThreadOverlayPanel = memo(function ThreadOverlayPanel({
           <input
             type="text"
             className="overlay-panel__input"
-            placeholder="Thread name..."
+            placeholder={i18n('icu:Overlay--placeholder-thread-name')}
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
             onKeyDown={e => {
@@ -116,18 +154,17 @@ export const ThreadOverlayPanel = memo(function ThreadOverlayPanel({
             onClick={() => void handleCreateThread()}
             disabled={!newTitle.trim()}
           >
-            Create
+            {i18n('icu:Overlay--create-thread')}
           </button>
         </div>
       )}
 
       {threads.length === 0 && !showCreate ? (
         <div className="overlay-panel__empty">
-          No threads yet. Create one from a message context menu or use the +
-          button above.
+          {i18n('icu:Overlay--empty-threads')}
         </div>
       ) : (
-        <ul className="overlay-panel__list">
+        <ul className="overlay-panel__list" role="list">
           {threads.map(thread => (
             <ThreadListItem
               key={thread.thread_ref}
@@ -196,7 +233,7 @@ const ThreadListItem = memo(function ThreadListItem({
     <li className={itemClass}>
       <div className="overlay-panel__item-main">
         {thread.is_pinned && (
-          <span className="overlay-panel__pin-badge" title="Pinned">
+          <span className="overlay-panel__pin-badge" aria-hidden="true">
             &#x1f4cc;
           </span>
         )}
@@ -216,37 +253,37 @@ const ThreadListItem = memo(function ThreadListItem({
           />
         ) : (
           <span className="overlay-panel__item-title">
-            {thread.title || 'Untitled'}
+            {thread.title || i18n('icu:Overlay--untitled')}
           </span>
         )}
         <span className="overlay-panel__item-count">
-          {messageCount} msg{messageCount !== 1 ? 's' : ''}
+          {i18n('icu:Overlay--message-count', { count: messageCount })}
         </span>
       </div>
       <div className="overlay-panel__item-actions">
         <button
           type="button"
-          title="Rename"
+          aria-label={i18n('icu:Overlay--rename-thread')}
           onClick={() => {
             setEditTitle(thread.title ?? '');
             setIsEditing(true);
           }}
         >
-          Rename
+          {i18n('icu:Overlay--rename-thread')}
         </button>
         <button
           type="button"
-          title={thread.is_pinned ? 'Unpin' : 'Pin'}
+          aria-label={thread.is_pinned ? i18n('icu:Overlay--unpin-thread') : i18n('icu:Overlay--pin-thread')}
           onClick={() => void handlePin()}
         >
-          {thread.is_pinned ? 'Unpin' : 'Pin'}
+          {thread.is_pinned ? i18n('icu:Overlay--unpin-thread') : i18n('icu:Overlay--pin-thread')}
         </button>
         <button
           type="button"
-          title="Delete"
+          aria-label={i18n('icu:Overlay--delete-thread')}
           onClick={() => void handleDelete()}
         >
-          Delete
+          {i18n('icu:Overlay--delete-thread')}
         </button>
       </div>
     </li>

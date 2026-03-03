@@ -1039,6 +1039,146 @@
     "messageformat": "Offline",
     "description": "Displayed when the desktop client has no network connection."
   },
+  "icu:Overlay--add-label": {
+    "messageformat": "Add label",
+    "description": "Context menu item to add a label to a message overlay"
+  },
+  "icu:Overlay--add-to-thread": {
+    "messageformat": "Add to thread\u2026",
+    "description": "Context menu item to assign message to a thread overlay"
+  },
+  "icu:Overlay--all-messages": {
+    "messageformat": "All",
+    "description": "Chip label to clear thread filter and show all messages"
+  },
+  "icu:Overlay--assign-to-thread": {
+    "messageformat": "Assign to thread",
+    "description": "Button label in thread dialog to assign message to selected thread"
+  },
+  "icu:Overlay--close": {
+    "messageformat": "Close",
+    "description": "Accessible label for close button in overlay dialogs"
+  },
+  "icu:Overlay--create-and-assign": {
+    "messageformat": "Create & assign",
+    "description": "Button label to create a new thread and assign a message"
+  },
+  "icu:Overlay--create-thread": {
+    "messageformat": "Create",
+    "description": "Button label to create a new thread in the panel"
+  },
+  "icu:Overlay--create-thread-button": {
+    "messageformat": "Create new thread",
+    "description": "Accessible label for the add thread button in panel"
+  },
+  "icu:Overlay--delete-thread": {
+    "messageformat": "Delete",
+    "description": "Button label to delete a thread overlay"
+  },
+  "icu:Overlay--dialog-add-to-thread": {
+    "messageformat": "Add to Thread",
+    "description": "Title of the thread assignment dialog"
+  },
+  "icu:Overlay--dialog-edit-labels": {
+    "messageformat": "Labels",
+    "description": "Title of the label editor dialog"
+  },
+  "icu:Overlay--empty-labels": {
+    "messageformat": "No labels yet",
+    "description": "Shown in label editor when message has no labels"
+  },
+  "icu:Overlay--empty-threads": {
+    "messageformat": "No threads yet. Create one from a message context menu or use the + button above.",
+    "description": "Empty state text shown in thread overlay panel"
+  },
+  "icu:Overlay--error-generic": {
+    "messageformat": "Something went wrong with the overlay. Please try again.",
+    "description": "Generic error message for overlay operations"
+  },
+  "icu:Overlay--existing-thread-tab": {
+    "messageformat": "Existing thread",
+    "description": "Tab label for assigning to existing thread in dialog"
+  },
+  "icu:Overlay--filter-active": {
+    "messageformat": "Showing thread: {title}",
+    "description": "Accessible status when thread filter is active"
+  },
+  "icu:Overlay--label-add": {
+    "messageformat": "Add",
+    "description": "Button label to add a new label"
+  },
+  "icu:Overlay--loading": {
+    "messageformat": "Loading\u2026",
+    "description": "Loading state text for overlay components"
+  },
+  "icu:Overlay--menu-group": {
+    "messageformat": "Overlay",
+    "description": "Group label for overlay items in context menu"
+  },
+  "icu:Overlay--message-count": {
+    "messageformat": "{count, plural, one {# msg} other {# msgs}}",
+    "description": "Message count shown next to thread in panel"
+  },
+  "icu:Overlay--new-thread-tab": {
+    "messageformat": "New thread",
+    "description": "Tab label for creating new thread in dialog"
+  },
+  "icu:Overlay--pin-thread": {
+    "messageformat": "Pin",
+    "description": "Button label to pin a thread overlay"
+  },
+  "icu:Overlay--placeholder-add-label": {
+    "messageformat": "Add label\u2026",
+    "description": "Placeholder text for label input field"
+  },
+  "icu:Overlay--placeholder-thread-name": {
+    "messageformat": "Thread name\u2026",
+    "description": "Placeholder text for thread name input field"
+  },
+  "icu:Overlay--remove-label": {
+    "messageformat": "Remove label \"{label}\"",
+    "description": "Accessible label for removing a specific label"
+  },
+  "icu:Overlay--rename-thread": {
+    "messageformat": "Rename",
+    "description": "Button label to rename a thread overlay"
+  },
+  "icu:Overlay--thread-chip-row-label": {
+    "messageformat": "Threads:",
+    "description": "Label shown before thread chips in chip row"
+  },
+  "icu:Overlay--thread-overlays-title": {
+    "messageformat": "Thread Overlays",
+    "description": "Title of the thread overlay panel"
+  },
+  "icu:Overlay--undo-action": {
+    "messageformat": "Undo",
+    "description": "Button label on undo toast"
+  },
+  "icu:Overlay--undo-deleted-thread": {
+    "messageformat": "Thread \"{title}\" deleted",
+    "description": "Undo toast message after deleting a thread"
+  },
+  "icu:Overlay--undo-removed-from-thread": {
+    "messageformat": "Message removed from thread",
+    "description": "Undo toast message after removing message from thread"
+  },
+  "icu:Overlay--undo-removed-label": {
+    "messageformat": "Label \"{label}\" removed",
+    "description": "Undo toast message after removing a label"
+  },
+  "icu:Overlay--unnamed-thread": {
+    "messageformat": "Unnamed thread",
+    "description": "Fallback title for threads without a name"
+  },
+  "icu:Overlay--unpin-thread": {
+    "messageformat": "Unpin",
+    "description": "Button label to unpin a thread overlay"
+  },
+  "icu:Overlay--untitled": {
+    "messageformat": "Untitled",
+    "description": "Fallback display name for threads without a title"
+  },
   "icu:checkNetworkConnection": {
     "messageformat": "Check your network connection.",
     "description": "Obvious instructions for when a user's computer loses its network connection"
