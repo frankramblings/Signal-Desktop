@@ -51,6 +51,8 @@ import { parseIntOrThrow } from '../util/parseIntOrThrow.std.js';
 import { updateSchema } from './migrations/index.node.js';
 import * as OverlayTypes from '../overlay/models/OverlayTypes.std.js';
 import * as OverlayStore from '../overlay/store/OverlayStore.node.js';
+import * as OverlaySyncStore from '../overlay/sync/OverlaySyncStoreExtensions.node.js';
+import type { OverlaySyncState } from '../overlay/sync/OverlaySyncTypes.std.js';
 import type { JSONRows, QueryTemplate, QueryFragment } from './util.std.js';
 import {
   batchMultiVarQuery,
@@ -9710,6 +9712,36 @@ function overlayDeleteMessageOverlay(
   messageRef: string
 ): boolean {
   return OverlayStore.deleteMessageOverlay(db, messageRef);
+}
+
+// ─── Overlay sync CRUD (M3) ──────────────────────────────────────────────
+
+function overlayGetThreadsDirtySince(
+  db: ReadableDB,
+  sinceTimestamp: number
+): ReadonlyArray<OverlayTypes.ThreadOverlayType> {
+  return OverlaySyncStore.getThreadsDirtySince(db, sinceTimestamp);
+}
+
+function overlayGetMessagesDirtySince(
+  db: ReadableDB,
+  sinceTimestamp: number
+): ReadonlyArray<OverlayTypes.MessageOverlayType> {
+  return OverlaySyncStore.getMessagesDirtySince(db, sinceTimestamp);
+}
+
+function overlayGetSyncState(
+  db: ReadableDB,
+  deviceId: string
+): OverlaySyncState | undefined {
+  return OverlaySyncStore.getSyncState(db, deviceId);
+}
+
+function overlaySetSyncState(
+  db: WritableDB,
+  state: OverlaySyncState
+): void {
+  OverlaySyncStore.setSyncState(db, state);
 }
 
 function __dangerouslyRunAbitraryReadOnlySqlQuery(

@@ -85,6 +85,7 @@ import type {
   CreateMessageOverlayInput,
   UpdateMessageOverlayInput,
 } from '../overlay/models/OverlayTypes.std.js';
+import type { OverlaySyncState } from '../overlay/sync/OverlaySyncTypes.std.js';
 import { sqlFragment, sqlId, sqlJoin } from './util.std.js';
 import type { MIMEType } from '../types/MIME.std.js';
 
@@ -1127,6 +1128,17 @@ type ReadableInterface = {
   overlayGetMessageOverlaysByConversation: (
     conversationRef: string
   ) => ReadonlyArray<MessageOverlayType>;
+
+  // Overlay sync reads (M3)
+  overlayGetThreadsDirtySince: (
+    sinceTimestamp: number
+  ) => ReadonlyArray<ThreadOverlayType>;
+  overlayGetMessagesDirtySince: (
+    sinceTimestamp: number
+  ) => ReadonlyArray<MessageOverlayType>;
+  overlayGetSyncState: (
+    deviceId: string
+  ) => OverlaySyncState | undefined;
 };
 
 type WritableInterface = {
@@ -1530,6 +1542,9 @@ type WritableInterface = {
     updates: UpdateMessageOverlayInput
   ) => boolean;
   overlayDeleteMessageOverlay: (messageRef: string) => boolean;
+
+  // Overlay sync writes (M3)
+  overlaySetSyncState: (state: OverlaySyncState) => void;
 };
 
 // Adds a database argument

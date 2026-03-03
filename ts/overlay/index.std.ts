@@ -26,6 +26,9 @@ export {
   isOverlayThreadsEnabled,
   setOverlayThreadsEnabled,
   setOverlayThreadsEnabledForTesting,
+  isOverlayCloudSyncEnabled,
+  setOverlayCloudSyncEnabled,
+  setOverlayCloudSyncEnabledForTesting,
 } from './OverlayFeatureFlag.std.js';
 
 // Renderer-only exports (do not import in .node.ts files)

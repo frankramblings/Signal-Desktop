@@ -1,0 +1,109 @@
+// Copyright 2026 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
+// Styles for overlay sync diagnostics panel (M3).
+
+.overlay-sync-diagnostics {
+  padding: 16px;
+  border: 1px solid var(--color-gray-15);
+  border-radius: 8px;
+  margin: 12px 0;
+  background: var(--color-gray-02);
+
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--color-gray-90);
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 13px;
+
+    &--error {
+      color: var(--color-accent-red);
+    }
+  }
+
+  &__label {
+    color: var(--color-gray-60);
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  &__value {
+    color: var(--color-gray-90);
+    text-align: right;
+
+    &--error {
+      color: var(--color-accent-red);
+      font-size: 12px;
+    }
+  }
+
+  &__error-time {
+    color: var(--color-gray-45);
+    font-size: 11px;
+  }
+
+  &__sync-button {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px 16px;
+    border: 1px solid var(--color-gray-15);
+    border-radius: 6px;
+    background: var(--color-white);
+    color: var(--color-gray-90);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: var(--color-gray-05);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Status indicator dot
+.overlay-sync-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+
+  &--idle {
+    background: var(--color-accent-green);
+  }
+
+  &--syncing {
+    background: var(--color-accent-blue);
+    animation: overlay-sync-pulse 1.2s ease-in-out infinite;
+  }
+
+  &--error {
+    background: var(--color-accent-red);
+  }
+}
+
+@keyframes overlay-sync-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
