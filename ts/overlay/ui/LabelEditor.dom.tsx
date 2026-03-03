@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // LabelEditor: compact dialog for adding/removing labels on a message
-// overlay. Self-contained — calls OverlayService directly.
+// overlay. Self-contained.
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import * as OverlayService from '../services/OverlayService.dom.js';
 import type { MessageRefInput } from '../services/MessageRefAdapter.std.js';
+import { OverlayErrorBanner } from './OverlayErrorBanner.dom.js';
+
+const { i18n } = window.SignalContext;
 
 export type LabelEditorProps = {
   messageRefInput: MessageRefInput;
@@ -20,12 +23,16 @@ export const LabelEditor = memo(function LabelEditor({
   const [labels, setLabels] = useState<ReadonlyArray<string>>([]);
   const [newLabel, setNewLabel] = useState('');
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Load existing labels for this message.
   useEffect(() => {
     void (async () => {
-      const overlay = await OverlayService.getMessageOverlay(messageRefInput);
-      setLabels(overlay?.labels ?? []);
+      try {
+        const overlay = await OverlayService.getMessageOverlay(messageRefInput);
+        setLabels(overlay?.labels ?? []);
+      } catch {
+        setErrorMessage(i18n('icu:Overlay--error-generic'));
+      }
       setLoading(false);
     })();
   }, [messageRefInput]);
@@ -33,28 +40,43 @@ export const LabelEditor = memo(function LabelEditor({
   const handleAdd = useCallback(async () => {
     const trimmed = newLabel.trim();
     if (!trimmed) return;
-    await OverlayService.addLabel(
-      messageRefInput,
-      messageRefInput.conversationId,
-      trimmed
-    );
-    setLabels(prev => [...prev, trimmed]);
-    setNewLabel('');
+    try {
+      await OverlayService.addLabel(
+        messageRefInput,
+        messageRefInput.conversationId,
+        trimmed
+      );
+      setLabels(prev => [...prev, trimmed]);
+      setNewLabel('');
+    } catch {
+      setErrorMessage(i18n('icu:Overlay--error-generic'));
+    }
   }, [newLabel, messageRefInput]);
 
   const handleRemove = useCallback(
     async (label: string) => {
-      await OverlayService.removeLabel(messageRefInput, label);
-      setLabels(prev => prev.filter(l => l !== label));
+      try {
+        await OverlayService.removeLabel(messageRefInput, label);
+        setLabels(prev => prev.filter(l => l !== label));
+      } catch {
+        setErrorMessage(i18n('icu:Overlay--error-generic'));
+      }
     },
     [messageRefInput]
   );
 
+  const dialogTitleId = 'overlay-label-editor-title';
+
   if (loading) {
     return (
       <div className="overlay-dialog__backdrop" onClick={onClose} role="presentation">
-        <div className="overlay-label-editor" onClick={e => e.stopPropagation()} role="dialog" aria-label="Edit labels">
-          <div style={{ padding: 16 }}>Loading...</div>
+        <div
+          className="overlay-label-editor"
+          onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-labelledby={dialogTitleId}
+        >
+          <div style={{ padding: 16 }}>{i18n('icu:Overlay--loading')}</div>
         </div>
       </div>
     );
@@ -66,18 +88,24 @@ export const LabelEditor = memo(function LabelEditor({
         className="overlay-label-editor"
         onClick={e => e.stopPropagation()}
         role="dialog"
-        aria-label="Edit labels"
+        aria-labelledby={dialogTitleId}
       >
         <div className="overlay-label-editor__header">
-          <h4>Labels</h4>
+          <h4 id={dialogTitleId}>{i18n('icu:Overlay--dialog-edit-labels')}</h4>
           <button
             type="button"
             className="overlay-dialog__close"
             onClick={onClose}
+            aria-label={i18n('icu:Overlay--close')}
           >
             &times;
           </button>
         </div>
+
+        <OverlayErrorBanner
+          message={errorMessage}
+          onDismiss={() => setErrorMessage(null)}
+        />
 
         <div className="overlay-label-editor__tags">
           {labels.map(label => (
@@ -87,14 +115,16 @@ export const LabelEditor = memo(function LabelEditor({
                 type="button"
                 className="overlay-label-editor__tag-remove"
                 onClick={() => void handleRemove(label)}
-                title={`Remove label "${label}"`}
+                aria-label={i18n('icu:Overlay--remove-label', { label })}
               >
                 &times;
               </button>
             </span>
           ))}
           {labels.length === 0 && (
-            <span className="overlay-label-editor__no-tags">No labels yet</span>
+            <span className="overlay-label-editor__no-tags">
+              {i18n('icu:Overlay--empty-labels')}
+            </span>
           )}
         </div>
 
@@ -102,7 +132,7 @@ export const LabelEditor = memo(function LabelEditor({
           <input
             type="text"
             className="overlay-dialog__input"
-            placeholder="Add label..."
+            placeholder={i18n('icu:Overlay--placeholder-add-label')}
             value={newLabel}
             onChange={e => setNewLabel(e.target.value)}
             onKeyDown={e => {
@@ -118,7 +148,7 @@ export const LabelEditor = memo(function LabelEditor({
             onClick={() => void handleAdd()}
             disabled={!newLabel.trim()}
           >
-            Add
+            {i18n('icu:Overlay--label-add')}
           </button>
         </div>
       </div>
