@@ -4,7 +4,7 @@
 // OverlayUndoToast: fixed-position toast shown after destructive overlay actions.
 // Shows for 5s with an Undo button. Listens to OverlayEventBus for new undo entries.
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { overlayUndo } from '../services/OverlayUndoManager.dom.js';
 import { overlayEvents, OverlayEventType } from '../services/OverlayEventBus.dom.js';
 import type { UndoEntry } from '../services/OverlayUndoManager.dom.js';
@@ -15,12 +15,16 @@ const TOAST_DURATION_MS = 5000;
 
 export const OverlayUndoToast = memo(function OverlayUndoToast(): React.JSX.Element | null {
   const [entry, setEntry] = useState<UndoEntry | null>(null);
+  const lastSeenEntryRef = useRef<UndoEntry | null>(null);
 
-  // Listen for new undo entries by checking after every mutation event
+  // Listen for new undo entries — only show toast if peek() returns a NEW entry
   useEffect(() => {
     const handler = () => {
       const latest = overlayUndo.peek();
-      setEntry(latest);
+      if (latest && latest !== lastSeenEntryRef.current) {
+        lastSeenEntryRef.current = latest;
+        setEntry(latest);
+      }
     };
     overlayEvents.on(OverlayEventType.ThreadsChanged, handler);
     overlayEvents.on(OverlayEventType.MessagesChanged, handler);
@@ -67,7 +71,7 @@ export const OverlayUndoToast = memo(function OverlayUndoToast(): React.JSX.Elem
         type="button"
         className="overlay-undo-toast__dismiss"
         onClick={handleDismiss}
-        aria-label="Close"
+        aria-label={i18n('icu:Overlay--close')}
       >
         &times;
       </button>

@@ -121,6 +121,15 @@ export const ThreadChipRow = memo(function ThreadChipRow({
           );
         })}
       </div>
+      {activeFilterThreadRef && (
+        <span role="status" className="overlay-sr-only">
+          {i18n('icu:Overlay--filter-active', {
+            title:
+              threads.find(t => t.thread_ref === activeFilterThreadRef)
+                ?.title || '',
+          })}
+        </span>
+      )}
     </div>
   );
 });

@@ -22,6 +22,8 @@ import type { MessageRefInput } from '../services/MessageRefAdapter.std.js';
 import { overlayEvents, OverlayEventType } from './OverlayEventBus.dom.js';
 import { overlayUndo } from './OverlayUndoManager.dom.js';
 
+const { i18n } = window.SignalContext;
+
 export type CreateThreadOptions = {
   conversationId: string;
   title?: string;
@@ -102,7 +104,7 @@ export async function deleteThread(threadRef: string): Promise<boolean> {
   const result = await DataWriter.overlayDeleteThread(threadRef);
   if (result && thread) {
     overlayUndo.push({
-      description: `Thread "${thread.title || 'Untitled'}" deleted`,
+      description: i18n('icu:Overlay--undo-deleted-thread', { title: thread.title || i18n('icu:Overlay--untitled') }),
       execute: async () => {
         await DataWriter.overlayCreateThread({
           thread_ref: thread.thread_ref,
@@ -194,7 +196,7 @@ export async function removeMessageFromThread(
   const result = await DataWriter.overlayUpdateMessageOverlay(ref, { thread_ref: null });
   if (result && previousThreadRef) {
     overlayUndo.push({
-      description: 'Message removed from thread',
+      description: i18n('icu:Overlay--undo-removed-from-thread'),
       execute: async () => {
         await DataWriter.overlayUpdateMessageOverlay(ref, {
           thread_ref: previousThreadRef,
@@ -290,7 +292,7 @@ export async function removeLabel(
   const result = await DataWriter.overlayUpdateMessageOverlay(ref, { labels });
   if (result) {
     overlayUndo.push({
-      description: `Label "${label}" removed`,
+      description: i18n('icu:Overlay--undo-removed-label', { label }),
       execute: async () => {
         const current = await DataReader.overlayGetMessageOverlayByRef(ref);
         if (current) {

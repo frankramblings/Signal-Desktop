@@ -6,6 +6,8 @@
 
 import React, { memo, useEffect } from 'react';
 
+const { i18n } = window.SignalContext;
+
 const AUTO_DISMISS_MS = 8000;
 
 export type OverlayErrorBannerProps = {
@@ -32,7 +34,7 @@ export const OverlayErrorBanner = memo(function OverlayErrorBanner({
         type="button"
         className="overlay-error-banner__close"
         onClick={onDismiss}
-        aria-label="Close"
+        aria-label={i18n('icu:Overlay--close')}
       >
         &times;
       </button>

@@ -28,6 +28,7 @@ export {
   setOverlayThreadsEnabledForTesting,
 } from './OverlayFeatureFlag.std.js';
 
+// Renderer-only exports (do not import in .node.ts files)
 export {
   overlayEvents,
   OverlayEventType,
