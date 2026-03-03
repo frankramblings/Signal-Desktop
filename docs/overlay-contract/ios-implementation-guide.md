@@ -357,8 +357,14 @@ Execute them in the order shown. Each row is a discrete test case.
 ## 5. SQLite Schema (GRDB)
 
 Use GRDB migrations that produce tables identical to desktop's migration 1680.
-The DDL must be character-for-character equivalent at the SQL level (column
-names, types, defaults, constraints).
+The DDL must be equivalent at the SQL level (column names, types, defaults,
+constraints).
+
+**Important — STRICT mode:** Desktop's migration 1680 creates tables with SQLite
+`STRICT` mode (SQLite 3.37+). GRDB's `db.create(table:)` does not emit the
+`STRICT` keyword by default. Use raw SQL via `try db.execute(sql:)` if STRICT
+type enforcement is required, or accept that GRDB's type affinity provides
+equivalent safety for the overlay's simple schema (TEXT, INTEGER only).
 
 ### 5.1 GRDB Migration
 

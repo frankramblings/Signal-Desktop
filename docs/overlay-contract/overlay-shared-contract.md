@@ -304,7 +304,7 @@ These constraints MUST be enforced by all platforms when creating or updating re
 | `thread_ref`   | Non-empty string                                          |
 | `conversation_ref` | Non-empty string                                      |
 | `is_pinned`    | Boolean at runtime; integer 0 or 1 in storage             |
-| `updated_at`   | Positive integer (milliseconds since Unix epoch)          |
+| `updated_at`   | Non-negative integer (milliseconds since Unix epoch; 0 permitted for deleted/placeholder records) |
 | `version`      | Positive integer >= 1                                     |
 | `id`           | Non-empty string (MessageOverlay only)                    |
 | `message_ref`  | Non-empty string (MessageOverlay only)                    |
