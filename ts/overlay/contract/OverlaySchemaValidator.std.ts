@@ -5,15 +5,7 @@
 // Pure functions, zero dependencies beyond local overlay types — safe to use
 // on any platform (desktop, iOS bridge, test harness).
 
-import type {
-  ThreadOverlayType,
-  MessageOverlayType,
-} from '../models/OverlayTypes.std.js';
-import type {
-  SyncRecord,
-  ThreadSyncRecord,
-  MessageSyncRecord,
-} from '../sync/OverlaySyncTypes.std.js';
+import type { SyncRecord } from '../sync/OverlaySyncTypes.std.js';
 
 // ─── Validation result ─────────────────────────────────────────────────────
 
@@ -33,31 +25,25 @@ export function validateThreadOverlay(obj: unknown): ValidationResult {
 
   const rec = obj as Record<string, unknown>;
 
-  // Handle wrapped format from fixtures: { name: ..., record: {...} }
-  const data =
-    rec.record != null && typeof rec.record === 'object'
-      ? (rec.record as Record<string, unknown>)
-      : rec;
-
-  if (typeof data.thread_ref !== 'string' || data.thread_ref.length === 0) {
+  if (typeof rec.thread_ref !== 'string' || rec.thread_ref.length === 0) {
     errors.push('thread_ref must be a non-empty string');
   }
   if (
-    typeof data.conversation_ref !== 'string' ||
-    data.conversation_ref.length === 0
+    typeof rec.conversation_ref !== 'string' ||
+    rec.conversation_ref.length === 0
   ) {
     errors.push('conversation_ref must be a non-empty string');
   }
-  if (data.title !== null && typeof data.title !== 'string') {
+  if (rec.title !== null && typeof rec.title !== 'string') {
     errors.push('title must be a string or null');
   }
-  if (data.color !== null && typeof data.color !== 'string') {
+  if (rec.color !== null && typeof rec.color !== 'string') {
     errors.push('color must be a string or null');
   }
-  if (typeof data.is_pinned !== 'boolean') {
+  if (typeof rec.is_pinned !== 'boolean') {
     errors.push('is_pinned must be a boolean');
   }
-  validateTimestampAndVersion(data, errors);
+  validateTimestampAndVersion(rec, errors);
 
   return { valid: errors.length === 0, errors };
 }
@@ -73,47 +59,41 @@ export function validateMessageOverlay(obj: unknown): ValidationResult {
 
   const rec = obj as Record<string, unknown>;
 
-  // Handle wrapped format from fixtures: { name: ..., record: {...} }
-  const data =
-    rec.record != null && typeof rec.record === 'object'
-      ? (rec.record as Record<string, unknown>)
-      : rec;
-
-  if (typeof data.id !== 'string' || data.id.length === 0) {
+  if (typeof rec.id !== 'string' || rec.id.length === 0) {
     errors.push('id must be a non-empty string');
   }
   if (
-    typeof data.message_ref !== 'string' ||
-    data.message_ref.length === 0
+    typeof rec.message_ref !== 'string' ||
+    rec.message_ref.length === 0
   ) {
     errors.push('message_ref must be a non-empty string');
   }
   if (
-    typeof data.conversation_ref !== 'string' ||
-    data.conversation_ref.length === 0
+    typeof rec.conversation_ref !== 'string' ||
+    rec.conversation_ref.length === 0
   ) {
     errors.push('conversation_ref must be a non-empty string');
   }
-  if (data.thread_ref !== null && typeof data.thread_ref !== 'string') {
+  if (rec.thread_ref !== null && typeof rec.thread_ref !== 'string') {
     errors.push('thread_ref must be a string or null');
   }
-  if (!Array.isArray(data.labels)) {
+  if (!Array.isArray(rec.labels)) {
     errors.push('labels must be an array');
   } else {
-    for (let i = 0; i < data.labels.length; i += 1) {
-      if (typeof data.labels[i] !== 'string') {
+    for (let i = 0; i < rec.labels.length; i += 1) {
+      if (typeof rec.labels[i] !== 'string') {
         errors.push(`labels[${i}] must be a string`);
       }
     }
   }
   if (
-    data.note !== null &&
-    data.note !== undefined &&
-    typeof data.note !== 'string'
+    rec.note !== null &&
+    rec.note !== undefined &&
+    typeof rec.note !== 'string'
   ) {
     errors.push('note must be a string or null');
   }
-  validateTimestampAndVersion(data, errors);
+  validateTimestampAndVersion(rec, errors);
 
   return { valid: errors.length === 0, errors };
 }

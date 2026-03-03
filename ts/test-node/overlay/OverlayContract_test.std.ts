@@ -107,14 +107,6 @@ describe('overlay/contract/OverlaySchemaValidator', () => {
       assert.deepEqual(result.errors, ['Expected an object']);
     });
 
-    it('handles wrapped fixture format with { name, record }', () => {
-      const wrapped = fixture.valid[0]; // has .name and .record
-      const result = validateThreadOverlay(wrapped);
-      assert.isTrue(
-        result.valid,
-        `Wrapped format should be valid: ${result.errors.join(', ')}`
-      );
-    });
   });
 
   // ─── validateMessageOverlay ───────────────────────────────────────────
@@ -168,14 +160,6 @@ describe('overlay/contract/OverlaySchemaValidator', () => {
       assert.deepEqual(result.errors, ['Expected an object']);
     });
 
-    it('handles wrapped fixture format with { name, record }', () => {
-      const wrapped = fixture.valid[0];
-      const result = validateMessageOverlay(wrapped);
-      assert.isTrue(
-        result.valid,
-        `Wrapped format should be valid: ${result.errors.join(', ')}`
-      );
-    });
   });
 
   // ─── validateSyncRecord ──────────────────────────────────────────────
@@ -414,6 +398,76 @@ describe('overlay/contract/OverlaySchemaValidator', () => {
         true
       );
       assert.equal((cleaned as Record<string, unknown>).thread_ref, 't4');
+    });
+  });
+
+  // ─── serialization roundtrip validation ─────────────────────────────
+
+  describe('serialization roundtrip fixtures', () => {
+    type RoundtripEntry = {
+      name: string;
+      record: Record<string, unknown>;
+      sqlite_row: Record<string, unknown>;
+      cloudkit_fields: Record<string, unknown>;
+    };
+    type RoundtripFixture = {
+      thread_roundtrips: ReadonlyArray<RoundtripEntry>;
+      message_roundtrips: ReadonlyArray<RoundtripEntry>;
+    };
+
+    const roundtrip = loadFixture<RoundtripFixture>(
+      'serialization-roundtrip.json'
+    );
+
+    describe('thread roundtrips — record validates', () => {
+      for (const entry of roundtrip.thread_roundtrips) {
+        it(`"${entry.name}" record passes validateThreadOverlay`, () => {
+          const result = validateThreadOverlay(entry.record);
+          assert.isTrue(
+            result.valid,
+            `Expected valid: ${result.errors.join(', ')}`
+          );
+        });
+      }
+    });
+
+    describe('message roundtrips — record validates', () => {
+      for (const entry of roundtrip.message_roundtrips) {
+        it(`"${entry.name}" record passes validateMessageOverlay`, () => {
+          const result = validateMessageOverlay(entry.record);
+          assert.isTrue(
+            result.valid,
+            `Expected valid: ${result.errors.join(', ')}`
+          );
+        });
+      }
+    });
+
+    describe('type coercion checks', () => {
+      for (const entry of roundtrip.thread_roundtrips) {
+        it(`"${entry.name}" is_pinned: runtime boolean → SQLite integer`, () => {
+          const runtimeVal = entry.record.is_pinned;
+          const sqliteVal = entry.sqlite_row.is_pinned;
+          assert.strictEqual(
+            sqliteVal,
+            runtimeVal ? 1 : 0,
+            'SQLite is_pinned should be 1 or 0'
+          );
+        });
+      }
+
+      for (const entry of roundtrip.message_roundtrips) {
+        it(`"${entry.name}" labels: runtime array → SQLite JSON string`, () => {
+          const runtimeLabels = entry.record.labels;
+          const sqliteLabelsJson = entry.sqlite_row.labels_json;
+          assert.isArray(runtimeLabels);
+          assert.isString(sqliteLabelsJson);
+          assert.deepEqual(
+            JSON.parse(sqliteLabelsJson as string),
+            runtimeLabels
+          );
+        });
+      }
     });
   });
 
