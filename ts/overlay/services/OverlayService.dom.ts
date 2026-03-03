@@ -19,6 +19,8 @@ import type {
   UpdateMessageOverlayInput,
 } from '../models/OverlayTypes.std.js';
 import type { MessageRefInput } from '../services/MessageRefAdapter.std.js';
+import { overlayEvents, OverlayEventType } from './OverlayEventBus.dom.js';
+import { overlayUndo } from './OverlayUndoManager.dom.js';
 
 export type CreateThreadOptions = {
   conversationId: string;
@@ -60,6 +62,7 @@ export async function createThread(
     });
   }
 
+  overlayEvents.emit(OverlayEventType.ThreadsChanged);
   return thread;
 }
 
@@ -82,11 +85,44 @@ export async function updateThread(
   threadRef: string,
   updates: UpdateThreadOverlayInput
 ): Promise<boolean> {
-  return DataWriter.overlayUpdateThread(threadRef, updates);
+  const result = await DataWriter.overlayUpdateThread(threadRef, updates);
+  if (result) {
+    overlayEvents.emit(OverlayEventType.ThreadsChanged);
+  }
+  return result;
 }
 
 export async function deleteThread(threadRef: string): Promise<boolean> {
-  return DataWriter.overlayDeleteThread(threadRef);
+  // Snapshot for undo before deleting
+  const thread = await DataReader.overlayGetThreadOverlay(threadRef);
+  const messages = thread
+    ? await DataReader.overlayGetMessageOverlaysByThread(threadRef)
+    : [];
+
+  const result = await DataWriter.overlayDeleteThread(threadRef);
+  if (result && thread) {
+    overlayUndo.push({
+      description: `Thread "${thread.title || 'Untitled'}" deleted`,
+      execute: async () => {
+        await DataWriter.overlayCreateThread({
+          thread_ref: thread.thread_ref,
+          conversation_ref: thread.conversation_ref,
+          title: thread.title,
+          color: thread.color,
+          is_pinned: thread.is_pinned,
+        });
+        for (const msg of messages) {
+          await DataWriter.overlayUpdateMessageOverlay(msg.message_ref, {
+            thread_ref: threadRef,
+          });
+        }
+        overlayEvents.emit(OverlayEventType.ThreadsChanged);
+        overlayEvents.emit(OverlayEventType.MessagesChanged);
+      },
+    });
+    overlayEvents.emit(OverlayEventType.ThreadsChanged);
+  }
+  return result;
 }
 
 export async function togglePinThread(
@@ -96,9 +132,13 @@ export async function togglePinThread(
   if (!thread) {
     return false;
   }
-  return DataWriter.overlayUpdateThread(threadRef, {
+  const result = await DataWriter.overlayUpdateThread(threadRef, {
     is_pinned: !thread.is_pinned,
   });
+  if (result) {
+    overlayEvents.emit(OverlayEventType.ThreadsChanged);
+  }
+  return result;
 }
 
 // ─── Message overlay operations ───────────────────────────────────────────
@@ -120,6 +160,7 @@ export async function assignMessageToThread(
     await DataWriter.overlayUpdateMessageOverlay(ref, {
       thread_ref: options.threadRef,
     });
+    overlayEvents.emit(OverlayEventType.MessagesChanged);
     return {
       ...existing,
       thread_ref: options.threadRef,
@@ -128,12 +169,14 @@ export async function assignMessageToThread(
     };
   }
 
-  return DataWriter.overlayCreateMessageOverlay({
+  const result = await DataWriter.overlayCreateMessageOverlay({
     id: generateUuid(),
     message_ref: ref,
     conversation_ref: options.conversationId,
     thread_ref: options.threadRef,
   });
+  overlayEvents.emit(OverlayEventType.MessagesChanged);
+  return result;
 }
 
 export async function removeMessageFromThread(
@@ -143,7 +186,25 @@ export async function removeMessageFromThread(
   if (!ref) {
     return false;
   }
-  return DataWriter.overlayUpdateMessageOverlay(ref, { thread_ref: null });
+
+  // Snapshot for undo
+  const existing = await DataReader.overlayGetMessageOverlayByRef(ref);
+  const previousThreadRef = existing?.thread_ref ?? null;
+
+  const result = await DataWriter.overlayUpdateMessageOverlay(ref, { thread_ref: null });
+  if (result && previousThreadRef) {
+    overlayUndo.push({
+      description: 'Message removed from thread',
+      execute: async () => {
+        await DataWriter.overlayUpdateMessageOverlay(ref, {
+          thread_ref: previousThreadRef,
+        });
+        overlayEvents.emit(OverlayEventType.MessagesChanged);
+      },
+    });
+    overlayEvents.emit(OverlayEventType.MessagesChanged);
+  }
+  return result;
 }
 
 export async function getMessagesInThread(
@@ -193,7 +254,11 @@ export async function addLabel(
     if (!labels.includes(label)) {
       labels.push(label);
     }
-    return DataWriter.overlayUpdateMessageOverlay(ref, { labels });
+    const updateResult = await DataWriter.overlayUpdateMessageOverlay(ref, { labels });
+    if (updateResult) {
+      overlayEvents.emit(OverlayEventType.LabelsChanged);
+    }
+    return updateResult;
   }
 
   // Create new message overlay with the label.
@@ -203,6 +268,7 @@ export async function addLabel(
     conversation_ref: conversationId,
     labels: [label],
   });
+  overlayEvents.emit(OverlayEventType.LabelsChanged);
   return true;
 }
 
@@ -221,7 +287,22 @@ export async function removeLabel(
   }
 
   const labels = existing.labels.filter(l => l !== label);
-  return DataWriter.overlayUpdateMessageOverlay(ref, { labels });
+  const result = await DataWriter.overlayUpdateMessageOverlay(ref, { labels });
+  if (result) {
+    overlayUndo.push({
+      description: `Label "${label}" removed`,
+      execute: async () => {
+        const current = await DataReader.overlayGetMessageOverlayByRef(ref);
+        if (current) {
+          const restored = [...current.labels, label];
+          await DataWriter.overlayUpdateMessageOverlay(ref, { labels: restored });
+        }
+        overlayEvents.emit(OverlayEventType.LabelsChanged);
+      },
+    });
+    overlayEvents.emit(OverlayEventType.LabelsChanged);
+  }
+  return result;
 }
 
 // ─── Thread label operations ──────────────────────────────────────────────
@@ -248,7 +329,11 @@ export async function setNote(
 
   const existing = await DataReader.overlayGetMessageOverlayByRef(ref);
   if (existing) {
-    return DataWriter.overlayUpdateMessageOverlay(ref, { note });
+    const updateResult = await DataWriter.overlayUpdateMessageOverlay(ref, { note });
+    if (updateResult) {
+      overlayEvents.emit(OverlayEventType.MessagesChanged);
+    }
+    return updateResult;
   }
 
   await DataWriter.overlayCreateMessageOverlay({
@@ -257,5 +342,6 @@ export async function setNote(
     conversation_ref: conversationId,
     note,
   });
+  overlayEvents.emit(OverlayEventType.MessagesChanged);
   return true;
 }
