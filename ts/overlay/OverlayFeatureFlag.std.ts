@@ -106,3 +106,51 @@ export function setOverlayCloudSyncEnabledForTesting(
 ): void {
   _syncOverride = value;
 }
+
+// ─── iOS sync readiness flag ────────────────────────────────────────────────
+
+const IOS_SYNC_READY_KEY = 'overlayIosSyncReady';
+let _iosSyncReadyOverride: boolean | null = null;
+
+/**
+ * Returns true when this desktop instance signals that its overlay contract
+ * is stable enough for iOS clients to sync against the same CloudKit zone.
+ * Requires both overlayThreadsEnabled and overlayCloudSyncEnabled.
+ */
+export function isOverlayIosSyncReady(): boolean {
+  if (!isOverlayCloudSyncEnabled()) {
+    return false;
+  }
+
+  if (_iosSyncReadyOverride !== null) {
+    return _iosSyncReadyOverride;
+  }
+
+  if (
+    typeof window !== 'undefined' &&
+    window.storage &&
+    typeof window.storage.get === 'function'
+  ) {
+    return window.storage.get(IOS_SYNC_READY_KEY, false) === true;
+  }
+
+  return false;
+}
+
+export async function setOverlayIosSyncReady(
+  enabled: boolean
+): Promise<void> {
+  if (
+    typeof window !== 'undefined' &&
+    window.storage &&
+    typeof window.storage.put === 'function'
+  ) {
+    await window.storage.put(IOS_SYNC_READY_KEY, enabled);
+  }
+}
+
+export function setOverlayIosSyncReadyForTesting(
+  value: boolean | null
+): void {
+  _iosSyncReadyOverride = value;
+}

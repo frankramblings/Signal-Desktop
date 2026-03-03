@@ -1,0 +1,280 @@
+{
+  "conflict_resolution": [
+    {
+      "name": "remote_newer_timestamp",
+      "local": { "updated_at": 1000, "version": 1 },
+      "remote": { "updated_at": 2000, "version": 1 },
+      "expected": "keep_remote"
+    },
+    {
+      "name": "local_newer_timestamp",
+      "local": { "updated_at": 3000, "version": 1 },
+      "remote": { "updated_at": 1000, "version": 1 },
+      "expected": "keep_local"
+    },
+    {
+      "name": "same_timestamp_remote_higher_version",
+      "local": { "updated_at": 5000, "version": 2 },
+      "remote": { "updated_at": 5000, "version": 5 },
+      "expected": "keep_remote"
+    },
+    {
+      "name": "same_timestamp_local_higher_version",
+      "local": { "updated_at": 5000, "version": 5 },
+      "remote": { "updated_at": 5000, "version": 2 },
+      "expected": "keep_local"
+    },
+    {
+      "name": "full_tie_local_wins",
+      "local": { "updated_at": 5000, "version": 3 },
+      "remote": { "updated_at": 5000, "version": 3 },
+      "expected": "keep_local"
+    },
+    {
+      "name": "both_version_1_remote_newer",
+      "local": { "updated_at": 100, "version": 1 },
+      "remote": { "updated_at": 200, "version": 1 },
+      "expected": "keep_remote"
+    },
+    {
+      "name": "high_version_numbers",
+      "local": { "updated_at": 1709500000000, "version": 999 },
+      "remote": { "updated_at": 1709500000000, "version": 1000 },
+      "expected": "keep_remote"
+    },
+    {
+      "name": "timestamp_1ms_difference_remote_wins",
+      "local": { "updated_at": 1709500000000, "version": 10 },
+      "remote": { "updated_at": 1709500000001, "version": 1 },
+      "expected": "keep_remote"
+    },
+    {
+      "name": "timestamp_1ms_difference_local_wins",
+      "local": { "updated_at": 1709500000001, "version": 1 },
+      "remote": { "updated_at": 1709500000000, "version": 10 },
+      "expected": "keep_local"
+    }
+  ],
+  "merge_scenarios": [
+    {
+      "name": "remote_insert_no_local",
+      "local_record": null,
+      "remote_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t1a2b3c4-d5e6-7890-abcd-ef1234567890",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "New Remote Thread",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 1
+      },
+      "expected_action": "insert",
+      "expected_local_after": {
+        "thread_ref": "t1a2b3c4-d5e6-7890-abcd-ef1234567890",
+        "title": "New Remote Thread",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 1
+      }
+    },
+    {
+      "name": "remote_update_wins",
+      "local_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t2b3c4d5-e6f7-8901-bcde-f12345678901",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Old Local Title",
+        "color": "#aaaaaa",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 1
+      },
+      "remote_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t2b3c4d5-e6f7-8901-bcde-f12345678901",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Updated Remote Title",
+        "color": "#3498db",
+        "is_pinned": true,
+        "updated_at": 1709500005000,
+        "version": 2
+      },
+      "expected_action": "update",
+      "expected_local_after": {
+        "thread_ref": "t2b3c4d5-e6f7-8901-bcde-f12345678901",
+        "title": "Updated Remote Title",
+        "color": "#3498db",
+        "is_pinned": true,
+        "updated_at": 1709500005000,
+        "version": 2
+      }
+    },
+    {
+      "name": "local_update_wins",
+      "local_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t3c4d5e6-f7a8-9012-cdef-234567890123",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Newer Local Title",
+        "color": "#e74c3c",
+        "is_pinned": true,
+        "updated_at": 1709500010000,
+        "version": 5
+      },
+      "remote_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t3c4d5e6-f7a8-9012-cdef-234567890123",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Older Remote Title",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500005000,
+        "version": 2
+      },
+      "expected_action": "no_change",
+      "expected_local_after": {
+        "thread_ref": "t3c4d5e6-f7a8-9012-cdef-234567890123",
+        "title": "Newer Local Title",
+        "color": "#e74c3c",
+        "is_pinned": true,
+        "updated_at": 1709500010000,
+        "version": 5
+      }
+    },
+    {
+      "name": "remote_deletes_existing_local",
+      "local_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t4d5e6f7-a8b9-0123-def0-345678901234",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Will Be Deleted",
+        "color": null,
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 3
+      },
+      "remote_record": {
+        "_type": "thread_overlay",
+        "_deleted": true,
+        "thread_ref": "t4d5e6f7-a8b9-0123-def0-345678901234",
+        "conversation_ref": "",
+        "title": null,
+        "color": null,
+        "is_pinned": false,
+        "updated_at": 0,
+        "version": 0
+      },
+      "expected_action": "delete",
+      "expected_local_after": null
+    },
+    {
+      "name": "remote_deletes_nonexistent_local",
+      "local_record": null,
+      "remote_record": {
+        "_type": "thread_overlay",
+        "_deleted": true,
+        "thread_ref": "t5e6f7a8-b9c0-1234-ef01-456789012345",
+        "conversation_ref": "",
+        "title": null,
+        "color": null,
+        "is_pinned": false,
+        "updated_at": 0,
+        "version": 0
+      },
+      "expected_action": "no_change",
+      "expected_local_after": null
+    },
+    {
+      "name": "offline_edits_same_thread_remote_wins",
+      "local_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t6f7a8b9-c0d1-2345-f012-567890123456",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Edited Offline Local",
+        "color": "#111111",
+        "is_pinned": false,
+        "updated_at": 1709500003000,
+        "version": 4
+      },
+      "remote_record": {
+        "_type": "thread_overlay",
+        "thread_ref": "t6f7a8b9-c0d1-2345-f012-567890123456",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Edited Offline Remote",
+        "color": "#222222",
+        "is_pinned": true,
+        "updated_at": 1709500004000,
+        "version": 3
+      },
+      "expected_action": "update",
+      "expected_local_after": {
+        "thread_ref": "t6f7a8b9-c0d1-2345-f012-567890123456",
+        "title": "Edited Offline Remote",
+        "color": "#222222",
+        "is_pinned": true,
+        "updated_at": 1709500004000,
+        "version": 3
+      }
+    },
+    {
+      "name": "message_overlay_remote_insert",
+      "local_record": null,
+      "remote_record": {
+        "_type": "message_overlay",
+        "id": "m1a2b3c4-d5e6-7890-abcd-ef1234567890",
+        "message_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab:f0e1d2c3-b4a5-6789-0123-456789abcdef",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "thread_ref": "t1a2b3c4-d5e6-7890-abcd-ef1234567890",
+        "labels": ["ios-created"],
+        "note": "Sent from iPhone",
+        "updated_at": 1709500000000,
+        "version": 1
+      },
+      "expected_action": "insert",
+      "expected_local_after": {
+        "id": "m1a2b3c4-d5e6-7890-abcd-ef1234567890",
+        "message_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab:f0e1d2c3-b4a5-6789-0123-456789abcdef",
+        "labels": ["ios-created"],
+        "note": "Sent from iPhone",
+        "updated_at": 1709500000000,
+        "version": 1
+      }
+    },
+    {
+      "name": "message_overlay_label_conflict",
+      "local_record": {
+        "_type": "message_overlay",
+        "id": "m2b3c4d5-e6f7-8901-bcde-f12345678901",
+        "message_ref": "d2e3f4a5-b6c7-8901-def0-234567890abc:a0b1c2d3-e4f5-6789-0123-456789abcdef",
+        "conversation_ref": "d2e3f4a5-b6c7-8901-def0-234567890abc",
+        "thread_ref": null,
+        "labels": ["desktop-label"],
+        "note": null,
+        "updated_at": 1709500001000,
+        "version": 1
+      },
+      "remote_record": {
+        "_type": "message_overlay",
+        "id": "m2b3c4d5-e6f7-8901-bcde-f12345678901",
+        "message_ref": "d2e3f4a5-b6c7-8901-def0-234567890abc:a0b1c2d3-e4f5-6789-0123-456789abcdef",
+        "conversation_ref": "d2e3f4a5-b6c7-8901-def0-234567890abc",
+        "thread_ref": null,
+        "labels": ["ios-label", "shared"],
+        "note": "Added on iOS",
+        "updated_at": 1709500002000,
+        "version": 2
+      },
+      "expected_action": "update",
+      "expected_local_after": {
+        "id": "m2b3c4d5-e6f7-8901-bcde-f12345678901",
+        "message_ref": "d2e3f4a5-b6c7-8901-def0-234567890abc:a0b1c2d3-e4f5-6789-0123-456789abcdef",
+        "labels": ["ios-label", "shared"],
+        "note": "Added on iOS",
+        "updated_at": 1709500002000,
+        "version": 2
+      }
+    }
+  ]
+}
