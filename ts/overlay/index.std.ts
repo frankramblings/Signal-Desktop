@@ -29,7 +29,19 @@ export {
   isOverlayCloudSyncEnabled,
   setOverlayCloudSyncEnabled,
   setOverlayCloudSyncEnabledForTesting,
+  isOverlayIosSyncReady,
+  setOverlayIosSyncReady,
+  setOverlayIosSyncReadyForTesting,
 } from './OverlayFeatureFlag.std.js';
+
+export {
+  validateThreadOverlay,
+  validateMessageOverlay,
+  validateSyncRecord,
+  sanitizeForSync,
+} from './contract/OverlaySchemaValidator.std.js';
+
+export type { ValidationResult } from './contract/OverlaySchemaValidator.std.js';
 
 // Renderer-only exports (do not import in .node.ts files)
 export {

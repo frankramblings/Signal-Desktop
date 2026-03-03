@@ -26,6 +26,7 @@ import type {
   ThreadOverlayType,
   MessageOverlayType,
 } from '../models/OverlayTypes.std.js';
+import { validateSyncRecord } from '../contract/OverlaySchemaValidator.std.js';
 
 // ─── Conflict resolution ────────────────────────────────────────────────────
 
@@ -76,6 +77,16 @@ export function mergeRemoteRecords(
   };
 
   for (const record of records) {
+    const validation = validateSyncRecord(record);
+    if (!validation.valid) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'OverlaySyncMerger: skipping invalid remote record:',
+        validation.errors
+      );
+      continue;
+    }
+
     if (record._type === 'thread_overlay') {
       mergeThreadRecord(db, record, result);
     } else {

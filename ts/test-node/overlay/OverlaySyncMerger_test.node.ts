@@ -264,4 +264,47 @@ describe('overlay/sync/OverlaySyncMerger', () => {
       assert.isUndefined(getMessageOverlayByRef(db, 'conv-1:msg-del'));
     });
   });
+
+  // ─── Validation gate ───────────────────────────────────────────────
+
+  describe('validation gate', () => {
+    it('skips invalid records and processes valid ones', () => {
+      const invalidRecord = {
+        _type: 'thread_overlay',
+        // missing thread_ref — will fail validation
+        conversation_ref: 'conv-1',
+        title: 'Bad',
+        color: null,
+        is_pinned: false,
+        updated_at: 1000,
+        version: 1,
+      } as any;
+
+      const validRecord: ThreadSyncRecord = {
+        _type: 'thread_overlay',
+        thread_ref: 'conv-1:valid-t',
+        conversation_ref: 'conv-1',
+        title: 'Good',
+        color: null,
+        is_pinned: false,
+        updated_at: 2000,
+        version: 1,
+      };
+
+      const result = mergeRemoteRecords(db, [invalidRecord, validRecord]);
+      assert.equal(result.threadsInserted, 1);
+      assert.ok(getThreadOverlay(db, 'conv-1:valid-t'));
+    });
+
+    it('does not crash on completely malformed records', () => {
+      const malformed = {
+        _type: 'bad_type',
+        garbage: true,
+      } as any;
+
+      const result = mergeRemoteRecords(db, [malformed]);
+      assert.equal(result.threadsInserted, 0);
+      assert.equal(result.messagesInserted, 0);
+    });
+  });
 });
