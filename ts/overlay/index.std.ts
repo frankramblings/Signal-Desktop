@@ -27,3 +27,11 @@ export {
   setOverlayThreadsEnabled,
   setOverlayThreadsEnabledForTesting,
 } from './OverlayFeatureFlag.std.js';
+
+export {
+  overlayEvents,
+  OverlayEventType,
+} from './services/OverlayEventBus.dom.js';
+
+export { overlayUndo } from './services/OverlayUndoManager.dom.js';
+export type { UndoEntry } from './services/OverlayUndoManager.dom.js';
