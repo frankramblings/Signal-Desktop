@@ -49,6 +49,8 @@ import { isNormalNumber } from '../util/isNormalNumber.std.js';
 import { isNotNil } from '../util/isNotNil.std.js';
 import { parseIntOrThrow } from '../util/parseIntOrThrow.std.js';
 import { updateSchema } from './migrations/index.node.js';
+import * as OverlayTypes from '../overlay/models/OverlayTypes.std.js';
+import * as OverlayStore from '../overlay/store/OverlayStore.node.js';
 import type { JSONRows, QueryTemplate, QueryFragment } from './util.std.js';
 import {
   batchMultiVarQuery,
@@ -9606,6 +9608,108 @@ function ensureMessageInsertTriggersAreEnabled(db: WritableDB): void {
       enableMessageInsertTriggersAndBackfill(db);
     }
   })();
+}
+
+// ─── Overlay thread/message CRUD ──────────────────────────────────────────
+// Delegates to the isolated overlay store module.
+
+function overlayGetThreadsByConversation(
+  db: ReadableDB,
+  conversationRef: string
+): ReadonlyArray<OverlayTypes.ThreadOverlayType> {
+  return OverlayStore.getThreadsByConversation(db, conversationRef);
+}
+
+function overlayGetThreadOverlay(
+  db: ReadableDB,
+  threadRef: string
+): OverlayTypes.ThreadOverlayType | undefined {
+  return OverlayStore.getThreadOverlay(db, threadRef);
+}
+
+function overlayGetMessageOverlayByRef(
+  db: ReadableDB,
+  messageRef: string
+): OverlayTypes.MessageOverlayType | undefined {
+  return OverlayStore.getMessageOverlayByRef(db, messageRef);
+}
+
+function overlayGetMessageOverlaysByThread(
+  db: ReadableDB,
+  threadRef: string
+): ReadonlyArray<OverlayTypes.MessageOverlayType> {
+  return OverlayStore.getMessageOverlaysByThread(db, threadRef);
+}
+
+function overlayGetMessageOverlaysByConversation(
+  db: ReadableDB,
+  conversationRef: string
+): ReadonlyArray<OverlayTypes.MessageOverlayType> {
+  const [query, params] = sql`
+    SELECT * FROM message_overlay
+    WHERE conversation_ref = ${conversationRef}
+    ORDER BY updated_at ASC;
+  `;
+  const rows = db.prepare(query).all<OverlayTypes.MessageOverlayRow>(params);
+  return rows.map(row => {
+    let labels: ReadonlyArray<string>;
+    try {
+      labels = JSON.parse(row.labels_json) as ReadonlyArray<string>;
+    } catch {
+      labels = [];
+    }
+    return {
+      id: row.id,
+      message_ref: row.message_ref,
+      conversation_ref: row.conversation_ref,
+      thread_ref: row.thread_ref,
+      labels,
+      note: row.note,
+      updated_at: row.updated_at,
+      version: row.version,
+    };
+  });
+}
+
+function overlayCreateThread(
+  db: WritableDB,
+  input: OverlayTypes.CreateThreadOverlayInput
+): OverlayTypes.ThreadOverlayType {
+  return OverlayStore.createThreadOverlay(db, input);
+}
+
+function overlayUpdateThread(
+  db: WritableDB,
+  threadRef: string,
+  updates: OverlayTypes.UpdateThreadOverlayInput
+): boolean {
+  return OverlayStore.updateThreadOverlay(db, threadRef, updates);
+}
+
+function overlayDeleteThread(db: WritableDB, threadRef: string): boolean {
+  return OverlayStore.deleteThreadOverlay(db, threadRef);
+}
+
+function overlayCreateMessageOverlay(
+  db: WritableDB,
+  input: OverlayTypes.CreateMessageOverlayInput
+): OverlayTypes.MessageOverlayType {
+  return OverlayStore.createMessageOverlay(db, input);
+}
+
+function overlayUpdateMessageOverlay(
+  db: WritableDB,
+  messageRef: string,
+  updates: OverlayTypes.UpdateMessageOverlayInput
+): boolean {
+  return OverlayStore.updateMessageOverlay(db, messageRef, updates);
+}
+
+function overlayDeleteMessageOverlay(
+  db: WritableDB,
+  messageRef: string
+): boolean {
+  return OverlayStore.deleteMessageOverlay(db, messageRef);
 }
 
 function __dangerouslyRunAbitraryReadOnlySqlQuery(

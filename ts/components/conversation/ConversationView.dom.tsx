@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { useEscapeHandling } from '../../hooks/useEscapeHandling.dom.js';
 import { getSuggestedFilename } from '../../util/Attachment.std.js';
 import { IMAGE_PNG, type MIMEType } from '../../types/MIME.std.js';
+import { ThreadChipRow } from '../../overlay/ui/ThreadChipRow.dom.js';
 
 export type PropsType = {
   conversationId: string;
@@ -167,6 +168,7 @@ export function ConversationView({
           {renderConversationHeader(conversationId)}
         </div>
         <div className="ConversationView__pane">
+          <ThreadChipRow conversationId={conversationId} />
           <div className="ConversationView__timeline--container">
             <div aria-live="polite" className="ConversationView__timeline">
               {renderTimeline(conversationId)}

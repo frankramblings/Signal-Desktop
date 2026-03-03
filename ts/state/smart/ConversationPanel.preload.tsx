@@ -42,6 +42,7 @@ import { SmartPinnedMessagesPanel } from './PinnedMessagesPanel.preload.js';
 import { SmartMiniPlayer } from './MiniPlayer.preload.js';
 import { SmartGroupMemberLabelEditor } from './GroupMemberLabelEditor.preload.js';
 import { useNavActions } from '../ducks/nav.std.js';
+import { ThreadOverlayPanel } from '../../overlay/ui/ThreadOverlayPanel.dom.js';
 
 const log = createLogger('ConversationPanel');
 
@@ -346,6 +347,7 @@ const PanelContainer = forwardRef<
           panel.type !== PanelType.PinnedMessages &&
             panel.type !== PanelType.AllMedia &&
             panel.type !== PanelType.GroupMemberLabelEditor &&
+            panel.type !== PanelType.ThreadOverlay &&
             'ConversationPanel__body--padding'
         )}
         ref={focusRef}
@@ -423,6 +425,10 @@ function PanelElement({
     return <SmartStickerManager />;
   }
 
+  if (panel.type === PanelType.ThreadOverlay) {
+    return <ThreadOverlayPanel conversationId={conversationId} />;
+  }
+
   log.warn(toLogFormat(missingCaseError(panel.type)));
   return null;
 }
@@ -440,6 +446,7 @@ function getPanelKey(panel: PanelArgsType): string {
     case PanelType.NotificationSettings:
     case PanelType.PinnedMessages:
     case PanelType.StickerManager:
+    case PanelType.ThreadOverlay:
       return panel.type;
     case PanelType.MessageDetails:
     case PanelType.ContactDetails:

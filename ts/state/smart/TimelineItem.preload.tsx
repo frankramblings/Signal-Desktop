@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { RefObject } from 'react';
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { TimelineItem } from '../../components/conversation/TimelineItem.dom.js';
@@ -45,6 +45,11 @@ import type { MessageInteractivity } from '../../components/conversation/Message
 import { useNavActions } from '../ducks/nav.std.js';
 import { DataReader } from '../../sql/Client.preload.js';
 import { isInternalFeaturesEnabled } from '../../util/isInternalFeaturesEnabled.dom.js';
+import { isOverlayThreadsEnabled } from '../../overlay/OverlayFeatureFlag.std.js';
+import {
+  OverlayMenuActions,
+  useOverlayMenuState,
+} from '../../overlay/ui/OverlayMenuActions.dom.js';
 
 export type SmartTimelineItemProps = {
   containerElementRef: RefObject<HTMLElement>;
@@ -211,7 +216,31 @@ export const SmartTimelineItem = memo(function SmartTimelineItem(
     );
   }, [messageId]);
 
+  // Overlay thread actions — gated behind feature flag
+  const overlayEnabled = isOverlayThreadsEnabled();
+  const {
+    state: overlayMenuState,
+    openThreadDialog: overlayOpenThreadDialog,
+    openLabelDialog: overlayOpenLabelDialog,
+    closeDialog: overlayCloseDialog,
+  } = useOverlayMenuState();
+
+  const handleOverlayAddToThread = useCallback(() => {
+    overlayOpenThreadDialog({
+      conversationId,
+      signalMessageId: messageId,
+    });
+  }, [overlayOpenThreadDialog, conversationId, messageId]);
+
+  const handleOverlayAddLabel = useCallback(() => {
+    overlayOpenLabelDialog({
+      conversationId,
+      signalMessageId: messageId,
+    });
+  }, [overlayOpenLabelDialog, conversationId, messageId]);
+
   return (
+    <>
     <TimelineItem
       item={item}
       id={messageId}
@@ -290,6 +319,14 @@ export const SmartTimelineItem = memo(function SmartTimelineItem(
       toggleSafetyNumberModal={toggleSafetyNumberModal}
       viewStory={viewStory}
       toggleSelectMessage={toggleSelectMessage}
+      onOverlayAddToThread={overlayEnabled ? handleOverlayAddToThread : null}
+      onOverlayAddLabel={overlayEnabled ? handleOverlayAddLabel : null}
     />
+    <OverlayMenuActions
+      messageRefInput={overlayMenuState.messageRefInput}
+      openDialog={overlayMenuState.openDialog}
+      onClose={overlayCloseDialog}
+    />
+    </>
   );
 });
