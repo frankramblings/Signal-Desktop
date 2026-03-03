@@ -27,6 +27,8 @@ type MessageContextMenuProps = Readonly<{
   onUnpinMessage: (() => void) | null;
   onMoreInfo: (() => void) | null;
   onSelect: (() => void) | null;
+  onOverlayAddToThread: (() => void) | null;
+  onOverlayAddLabel: (() => void) | null;
   children: ReactNode;
 }>;
 
@@ -51,6 +53,8 @@ export function MessageContextMenu({
   onDeleteMessage,
   onPinMessage,
   onUnpinMessage,
+  onOverlayAddToThread,
+  onOverlayAddLabel,
   children,
 }: MessageContextMenuProps): JSX.Element {
   const shouldReturnFocusToTrigger = useRef(true);
@@ -131,6 +135,31 @@ export function MessageContextMenu({
           <AxoMenuBuilder.Item symbol="copy" onSelect={onCopy}>
             {i18n('icu:copy')}
           </AxoMenuBuilder.Item>
+        )}
+        {(onOverlayAddToThread || onOverlayAddLabel) && (
+          <>
+            <AxoMenuBuilder.Separator />
+            <AxoMenuBuilder.Group>
+              <AxoMenuBuilder.Label>Overlay</AxoMenuBuilder.Label>
+              {onOverlayAddToThread && (
+                <AxoMenuBuilder.Item
+                  symbol="thread"
+                  onSelect={onOverlayAddToThread}
+                >
+                  Add to thread...
+                </AxoMenuBuilder.Item>
+              )}
+              {onOverlayAddLabel && (
+                <AxoMenuBuilder.Item
+                  symbol="tag"
+                  onSelect={onOverlayAddLabel}
+                >
+                  Add label...
+                </AxoMenuBuilder.Item>
+              )}
+            </AxoMenuBuilder.Group>
+            <AxoMenuBuilder.Separator />
+          </>
         )}
         {onPinMessage && (
           <AxoMenuBuilder.Item symbol="pin" onSelect={onPinMessage}>

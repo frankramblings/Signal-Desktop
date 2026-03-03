@@ -66,6 +66,10 @@ export function getConversationTitleForPanelType(
     return undefined;
   }
 
+  if (panelType === PanelType.ThreadOverlay) {
+    return 'Thread Overlays';
+  }
+
   const unknownType: never = panelType;
   log.warn(`Got unexpected type ${unknownType}`);
 

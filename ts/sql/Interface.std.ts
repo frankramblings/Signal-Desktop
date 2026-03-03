@@ -77,6 +77,14 @@ import type {
   RemoteMegaphoneId,
   RemoteMegaphoneType,
 } from '../types/Megaphone.std.js';
+import type {
+  ThreadOverlayType,
+  MessageOverlayType,
+  CreateThreadOverlayInput,
+  UpdateThreadOverlayInput,
+  CreateMessageOverlayInput,
+  UpdateMessageOverlayInput,
+} from '../overlay/models/OverlayTypes.std.js';
 import { sqlFragment, sqlId, sqlJoin } from './util.std.js';
 import type { MIMEType } from '../types/MIME.std.js';
 
@@ -1102,6 +1110,23 @@ type ReadableInterface = {
   __dangerouslyRunAbitraryReadOnlySqlQuery: (
     readOnlySqlQuery: string
   ) => ReadonlyArray<RowType<object>>;
+
+  // Overlay thread reads
+  overlayGetThreadsByConversation: (
+    conversationRef: string
+  ) => ReadonlyArray<ThreadOverlayType>;
+  overlayGetThreadOverlay: (
+    threadRef: string
+  ) => ThreadOverlayType | undefined;
+  overlayGetMessageOverlayByRef: (
+    messageRef: string
+  ) => MessageOverlayType | undefined;
+  overlayGetMessageOverlaysByThread: (
+    threadRef: string
+  ) => ReadonlyArray<MessageOverlayType>;
+  overlayGetMessageOverlaysByConversation: (
+    conversationRef: string
+  ) => ReadonlyArray<MessageOverlayType>;
 };
 
 type WritableInterface = {
@@ -1487,6 +1512,24 @@ type WritableInterface = {
   cleanExpiredGroupCallRingCancellations(): void;
 
   _testOnlyRemoveMessageAttachments(timestamp: number): void;
+
+  // Overlay thread writes
+  overlayCreateThread: (
+    input: CreateThreadOverlayInput
+  ) => ThreadOverlayType;
+  overlayUpdateThread: (
+    threadRef: string,
+    updates: UpdateThreadOverlayInput
+  ) => boolean;
+  overlayDeleteThread: (threadRef: string) => boolean;
+  overlayCreateMessageOverlay: (
+    input: CreateMessageOverlayInput
+  ) => MessageOverlayType;
+  overlayUpdateMessageOverlay: (
+    messageRef: string,
+    updates: UpdateMessageOverlayInput
+  ) => boolean;
+  overlayDeleteMessageOverlay: (messageRef: string) => boolean;
 };
 
 // Adds a database argument
