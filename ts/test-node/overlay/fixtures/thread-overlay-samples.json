@@ -1,0 +1,130 @@
+{
+  "valid": [
+    {
+      "name": "standard_thread",
+      "record": {
+        "thread_ref": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Project Planning",
+        "color": "#3498db",
+        "is_pinned": true,
+        "updated_at": 1709500000000,
+        "version": 3
+      }
+    },
+    {
+      "name": "minimal_thread",
+      "record": {
+        "thread_ref": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "conversation_ref": "d2e3f4a5-b6c7-8901-def0-234567890abc",
+        "title": null,
+        "color": null,
+        "is_pinned": false,
+        "updated_at": 1709500001000,
+        "version": 1
+      }
+    },
+    {
+      "name": "emoji_title_thread",
+      "record": {
+        "thread_ref": "c3d4e5f6-a7b8-9012-cdef-234567890123",
+        "conversation_ref": "e3f4a5b6-c7d8-9012-ef01-34567890abcd",
+        "title": "\ud83d\ude80 Launch Prep",
+        "color": "#e74c3c",
+        "is_pinned": false,
+        "updated_at": 1709500002000,
+        "version": 5
+      }
+    },
+    {
+      "name": "single_char_title_thread",
+      "record": {
+        "thread_ref": "d4e5f6a7-b8c9-0123-def0-345678901234",
+        "conversation_ref": "f4a5b6c7-d8e9-0123-f012-4567890abcde",
+        "title": "X",
+        "color": "#000000",
+        "is_pinned": true,
+        "updated_at": 1,
+        "version": 1
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "missing_thread_ref",
+      "_reason": "thread_ref is required and must be a non-empty string",
+      "record": {
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "No Thread Ref",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 1
+      }
+    },
+    {
+      "name": "missing_conversation_ref",
+      "_reason": "conversation_ref is required and must be a non-empty string",
+      "record": {
+        "thread_ref": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "No Conversation Ref",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 1
+      }
+    },
+    {
+      "name": "is_pinned_wrong_type",
+      "_reason": "is_pinned must be boolean at runtime (or integer 0|1 in storage), not a string",
+      "record": {
+        "thread_ref": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Bad Pin Type",
+        "color": "#3498db",
+        "is_pinned": "yes",
+        "updated_at": 1709500000000,
+        "version": 1
+      }
+    },
+    {
+      "name": "updated_at_negative",
+      "_reason": "updated_at must be a positive integer (millisecond Unix epoch)",
+      "record": {
+        "thread_ref": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Negative Timestamp",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": -1,
+        "version": 1
+      }
+    },
+    {
+      "name": "version_zero",
+      "_reason": "version must be a positive integer >= 1",
+      "record": {
+        "thread_ref": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Zero Version",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 0
+      }
+    },
+    {
+      "name": "version_not_integer",
+      "_reason": "version must be an integer, not a floating-point number",
+      "record": {
+        "thread_ref": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "conversation_ref": "c1d2e3f4-a5b6-7890-cdef-1234567890ab",
+        "title": "Float Version",
+        "color": "#3498db",
+        "is_pinned": false,
+        "updated_at": 1709500000000,
+        "version": 1.5
+      }
+    }
+  ]
+}
