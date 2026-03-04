@@ -1,0 +1,29 @@
+/* Signal Overlay — English Localizable Strings */
+
+"Overlay.filter.all" = "All";
+"Overlay.threadList.title" = "Thread Overlays";
+"Overlay.threadList.create" = "Create Thread";
+"Overlay.threadList.empty" = "No threads yet. Create one from a message.";
+"Overlay.createThread.title" = "New Thread";
+"Overlay.createThread.placeholder" = "Thread title";
+"Overlay.createThread.create" = "Create";
+"Overlay.labelEditor.title" = "Edit Labels";
+"Overlay.labelEditor.placeholder" = "Add label";
+"Overlay.labelEditor.remove" = "Remove %@";
+"Overlay.menu.title" = "Thread Overlay";
+"Overlay.menu.addToThread" = "Add to Thread…";
+"Overlay.menu.createThread" = "Create Thread from Message";
+"Overlay.menu.addLabel" = "Add Label";
+"Overlay.undo" = "Undo";
+"Overlay.delete" = "Delete";
+"Overlay.error.loadFailed" = "Failed to load overlay data.";
+"Overlay.error.createFailed" = "Failed to create thread.";
+"Overlay.error.labelSaveFailed" = "Failed to save labels.";
+"Overlay.error.generic" = "An overlay error occurred.";
+"Overlay.pin" = "Pin";
+"Overlay.unpin" = "Unpin";
+"Overlay.thread.pinned" = "Pinned";
+"Overlay.thread.messages" = "%d messages";
+"Overlay.undo.threadDeleted" = "Thread deleted";
+"Overlay.undo.messageRemoved" = "Message removed from thread";
+"Overlay.undo.labelRemoved" = "Label removed";

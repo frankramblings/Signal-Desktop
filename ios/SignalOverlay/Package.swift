@@ -20,7 +20,8 @@ let package = Package(
         .target(
             name: "SignalOverlayUI",
             dependencies: ["SignalOverlay"],
-            path: "Sources/SignalOverlayUI"
+            path: "Sources/SignalOverlayUI",
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "SignalOverlayTests",
