@@ -47,6 +47,8 @@ public final class OverlayUndoToast: UIView {
     }
 
     public func show(message: String, in parentView: UIView, onUndo: @escaping () -> Void) {
+        removeFromSuperview()
+        alpha = 1
         self.onUndo = onUndo
         messageLabel.text = message
         translatesAutoresizingMaskIntoConstraints = false
@@ -75,8 +77,11 @@ public final class OverlayUndoToast: UIView {
     public func dismiss() {
         dismissTimer?.invalidate()
         dismissTimer = nil
-        UIView.animate(withDuration: 0.3, animations: { self.alpha = 0 }) { _ in
-            self.removeFromSuperview()
+        onUndo = nil
+        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+            self?.alpha = 0
+        }) { [weak self] _ in
+            self?.removeFromSuperview()
         }
     }
 }

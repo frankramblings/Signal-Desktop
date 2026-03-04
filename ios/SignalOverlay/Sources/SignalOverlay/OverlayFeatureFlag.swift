@@ -7,9 +7,20 @@ public enum OverlayFeatureFlag {
     private static let threadsKey = "overlayThreadsEnabled"
     private static let syncKey = "overlayCloudSyncEnabled"
 
-    // Test overrides
-    private static var _threadsOverride: Bool?
-    private static var _syncOverride: Bool?
+    // Thread-safe test overrides
+    private static let lock = NSLock()
+    private static var _threadsOverrideStorage: Bool?
+    private static var _syncOverrideStorage: Bool?
+
+    private static var _threadsOverride: Bool? {
+        get { lock.withLock { _threadsOverrideStorage } }
+        set { lock.withLock { _threadsOverrideStorage = newValue } }
+    }
+
+    private static var _syncOverride: Bool? {
+        get { lock.withLock { _syncOverrideStorage } }
+        set { lock.withLock { _syncOverrideStorage = newValue } }
+    }
 
     public static var isOverlayThreadsEnabled: Bool {
         if let override = _threadsOverride { return override }

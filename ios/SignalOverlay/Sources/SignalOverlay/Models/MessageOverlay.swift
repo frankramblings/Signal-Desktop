@@ -50,7 +50,7 @@ extension MessageOverlay: PersistableRecord {
         container["conversation_ref"] = conversationRef
         container["thread_ref"] = threadRef
         let labelsData = (try? JSONEncoder().encode(labels)) ?? Data("[]".utf8)
-        container["labels_json"] = String(data: labelsData, encoding: .utf8)!
+        container["labels_json"] = String(data: labelsData, encoding: .utf8) ?? "[]"
         container["note"] = note
         container["updated_at"] = updatedAt; container["version"] = version
     }

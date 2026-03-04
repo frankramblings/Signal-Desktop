@@ -4,6 +4,8 @@
 import Combine
 import Foundation
 
+// Thread-safety: All stored properties are `let` constants of PassthroughSubject,
+// whose `send()` is thread-safe in Combine. No mutable state exists in this class.
 public final class OverlayEventBus: @unchecked Sendable {
     public let threadsChanged = PassthroughSubject<Void, Never>()
     public let messagesChanged = PassthroughSubject<Void, Never>()

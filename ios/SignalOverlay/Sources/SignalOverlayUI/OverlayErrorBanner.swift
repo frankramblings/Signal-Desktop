@@ -39,6 +39,8 @@ public final class OverlayErrorBanner: UIView {
     }
 
     public func show(message: String, in parentView: UIView) {
+        removeFromSuperview()
+        alpha = 1
         label.text = message
         accessibilityLabel = message
         translatesAutoresizingMaskIntoConstraints = false
@@ -61,8 +63,10 @@ public final class OverlayErrorBanner: UIView {
     public func dismiss() {
         dismissTimer?.invalidate()
         dismissTimer = nil
-        UIView.animate(withDuration: 0.3, animations: { self.alpha = 0 }) { _ in
-            self.removeFromSuperview()
+        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+            self?.alpha = 0
+        }) { [weak self] _ in
+            self?.removeFromSuperview()
         }
     }
 }
