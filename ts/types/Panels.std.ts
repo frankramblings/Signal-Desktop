@@ -17,6 +17,7 @@ export enum PanelType {
   NotificationSettings = 'NotificationSettings',
   PinnedMessages = 'PinnedMessages',
   StickerManager = 'StickerManager',
+  ThreadOverlay = 'ThreadOverlay',
 }
 
 type PanelsWithArgs = ReadonlyDeep<

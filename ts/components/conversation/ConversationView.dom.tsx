@@ -1,11 +1,13 @@
 // Copyright 2020 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useEscapeHandling } from '../../hooks/useEscapeHandling.dom.js';
 import { getSuggestedFilename } from '../../util/Attachment.std.js';
 import { IMAGE_PNG, type MIMEType } from '../../types/MIME.std.js';
+import { ThreadChipRow } from '../../overlay/ui/ThreadChipRow.dom.js';
+import { OverlayUndoToast } from '../../overlay/ui/OverlayUndoToast.dom.js';
 
 export type PropsType = {
   conversationId: string;
@@ -148,6 +150,23 @@ export function ConversationView({
     [conversationId, processAttachments, hasOpenModal, hasOpenPanel]
   );
 
+  // ─── Overlay thread filter state ─────────────────────────────────────
+  const [activeFilterThreadRef, setActiveFilterThreadRef] = useState<
+    string | null
+  >(null);
+
+  const handleFilterChange = useCallback(
+    (threadRef: string | null) => {
+      setActiveFilterThreadRef(threadRef);
+    },
+    []
+  );
+
+  // Reset filter on conversation switch
+  useEffect(() => {
+    setActiveFilterThreadRef(null);
+  }, [conversationId]);
+
   useEscapeHandling(
     isSelectMode && !hasOpenModal ? onExitSelectMode : undefined
   );
@@ -167,7 +186,15 @@ export function ConversationView({
           {renderConversationHeader(conversationId)}
         </div>
         <div className="ConversationView__pane">
-          <div className="ConversationView__timeline--container">
+          <ThreadChipRow
+            conversationId={conversationId}
+            activeFilterThreadRef={activeFilterThreadRef}
+            onFilterChange={handleFilterChange}
+          />
+          <div
+            className="ConversationView__timeline--container"
+            data-overlay-filter-thread={activeFilterThreadRef ?? undefined}
+          >
             <div aria-live="polite" className="ConversationView__timeline">
               {renderTimeline(conversationId)}
             </div>
@@ -178,6 +205,7 @@ export function ConversationView({
         </div>
       </div>
       {renderPanel(conversationId)}
+      <OverlayUndoToast />
     </div>
   );
 }

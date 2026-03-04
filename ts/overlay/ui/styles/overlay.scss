@@ -1,0 +1,550 @@
+// Copyright 2026 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
+// Overlay thread UI styles — kept separate from Signal core styles.
+// Uses CSS custom properties (--color-*) which automatically adapt to
+// dark/light mode via Signal's theme system. No mixin dependencies.
+
+// ─── Thread chip row (above timeline) ─────────────────────────────────────
+
+.overlay-thread-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--color-gray-15, #e0e0e0);
+  background: var(--color-gray-02, #f8f8f8);
+  overflow-x: auto;
+  flex-shrink: 0;
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-gray-60, #6a6a6a);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__chips {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+}
+
+.overlay-thread-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--color-gray-25, #c0c0c0);
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: var(--color-gray-05, #f0f0f0);
+  }
+
+  &--active {
+    background: var(--color-ultramarine, #2c6bed);
+    color: #fff;
+    border-color: var(--color-ultramarine, #2c6bed);
+  }
+
+  &--pinned {
+    border-style: solid;
+    font-weight: 500;
+  }
+
+  &__pin-icon {
+    font-size: 9px;
+  }
+
+  &__title {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ─── Thread overlay panel ─────────────────────────────────────────────────
+
+.overlay-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+
+  &--loading {
+    justify-content: center;
+    align-items: center;
+    color: var(--color-gray-45, #8a8a8a);
+    font-size: 13px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--color-gray-15, #e0e0e0);
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__add-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--color-gray-25, #c0c0c0);
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--color-gray-05, #f0f0f0);
+    }
+  }
+
+  &__create-form {
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--color-gray-15, #e0e0e0);
+  }
+
+  &__input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid var(--color-gray-25, #c0c0c0);
+    border-radius: 4px;
+    font-size: 13px;
+    background: var(--color-gray-02, #f8f8f8);
+    color: inherit;
+
+    &--inline {
+      padding: 1px 4px;
+      font-size: 12px;
+    }
+  }
+
+  &__create-btn {
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: none;
+    background: var(--color-ultramarine, #2c6bed);
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  &__empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--color-gray-45, #8a8a8a);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__item {
+    border-bottom: 1px solid var(--color-gray-10, #eaeaea);
+
+    &-main {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--color-gray-05, #f0f0f0);
+      }
+    }
+
+    &-title {
+      flex: 1;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &-count {
+      font-size: 11px;
+      color: var(--color-gray-45, #8a8a8a);
+      flex-shrink: 0;
+    }
+
+    &-actions {
+      display: flex;
+      gap: 2px;
+      padding: 0 8px 4px;
+
+      button {
+        padding: 2px 6px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 11px;
+        border-radius: 3px;
+        color: var(--color-gray-45, #8a8a8a);
+
+        &:hover {
+          background: var(--color-gray-10, #eaeaea);
+          color: inherit;
+        }
+      }
+    }
+  }
+}
+
+// ─── Dialog (shared) ──────────────────────────────────────────────────────
+
+.overlay-dialog {
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  background: var(--color-white, #fff);
+  border-radius: 8px;
+  width: 360px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  color: var(--color-gray-90, #1a1a1a);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-gray-15, #e0e0e0);
+
+    h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    color: var(--color-gray-45, #8a8a8a);
+  }
+
+  &__tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-gray-15, #e0e0e0);
+  }
+
+  &__tab {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: inherit;
+
+    &--active {
+      border-bottom-color: var(--color-ultramarine, #2c6bed);
+      font-weight: 600;
+    }
+  }
+
+  &__body {
+    padding: 12px 16px;
+    overflow-y: auto;
+    max-height: 300px;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--color-gray-25, #c0c0c0);
+    border-radius: 4px;
+    font-size: 13px;
+    box-sizing: border-box;
+    background: var(--color-gray-02, #f8f8f8);
+    color: inherit;
+  }
+
+  &__create,
+  &__assign {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__btn {
+    padding: 6px 16px;
+    border: 1px solid var(--color-gray-25, #c0c0c0);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+
+    &--primary {
+      background: var(--color-ultramarine, #2c6bed);
+      color: #fff;
+      border: none;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  &__thread-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__thread-item {
+    &--selected {
+      background: rgba(44, 107, 237, 0.08);
+    }
+  }
+
+  &__thread-btn {
+    width: 100%;
+    text-align: left;
+    padding: 6px 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    color: inherit;
+
+    &:hover {
+      background: var(--color-gray-05, #f0f0f0);
+    }
+  }
+}
+
+// ─── Label editor ─────────────────────────────────────────────────────────
+
+.overlay-label-editor {
+  background: var(--color-white, #fff);
+  border-radius: 8px;
+  width: 300px;
+  max-width: 90vw;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  color: var(--color-gray-90, #1a1a1a);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-gray-15, #e0e0e0);
+
+    h4 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px 14px;
+    min-height: 30px;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(44, 107, 237, 0.1);
+    color: var(--color-ultramarine, #2c6bed);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  &__tag-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 2px;
+    color: inherit;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__no-tags {
+    color: var(--color-gray-45, #8a8a8a);
+    font-size: 12px;
+  }
+
+  &__input-row {
+    display: flex;
+    gap: 6px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--color-gray-15, #e0e0e0);
+  }
+}
+
+// ─── Screen reader only ──────────────────────────────────────────────────
+
+.overlay-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ─── Error banner ────────────────────────────────────────────────────────
+
+.overlay-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  margin: 4px 12px;
+  font-size: 12px;
+  color: #991b1b;
+
+  &__message {
+    flex: 1;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #991b1b;
+    padding: 0 2px;
+  }
+}
+
+// ─── Undo toast ──────────────────────────────────────────────────────────
+
+.overlay-undo-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--color-gray-75, #3b3b3b);
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-size: 13px;
+  animation: overlay-toast-in 0.2s ease-out;
+
+  &__message {
+    flex: 1;
+  }
+
+  &__undo-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__dismiss {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 2px;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+@keyframes overlay-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// ─── Focus styles for keyboard navigation ────────────────────────────────
+
+.overlay-thread-chip:focus-visible,
+.overlay-panel__add-btn:focus-visible,
+.overlay-panel__create-btn:focus-visible,
+.overlay-dialog__tab:focus-visible,
+.overlay-dialog__btn:focus-visible,
+.overlay-dialog__close:focus-visible,
+.overlay-dialog__thread-btn:focus-visible,
+.overlay-label-editor__tag-remove:focus-visible,
+.overlay-undo-toast__undo-btn:focus-visible {
+  outline: 2px solid var(--color-ultramarine, #2c6bed);
+  outline-offset: 2px;
+}

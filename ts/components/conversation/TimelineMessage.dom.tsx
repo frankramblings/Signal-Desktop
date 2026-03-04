@@ -87,6 +87,8 @@ export type PropsActions = {
     isPinningDisappearingMessage: boolean
   ) => void;
   handleDebugMessage: () => void;
+  onOverlayAddToThread?: (() => void) | null;
+  onOverlayAddLabel?: (() => void) | null;
 } & Omit<MessagePropsActions, 'onToggleSelect' | 'onReplyToMessage'>;
 
 export type Props = PropsData &
@@ -145,6 +147,8 @@ export function TimelineMessage(props: Props): React.JSX.Element {
     toggleDeleteMessagesModal,
     toggleForwardMessagesModal,
     toggleSelectMessage,
+    onOverlayAddToThread,
+    onOverlayAddLabel,
   } = props;
 
   const [reactionPickerRoot, setReactionPickerRoot] = useState<
@@ -370,6 +374,8 @@ export function TimelineMessage(props: Props): React.JSX.Element {
             })
           }
           onDebugMessage={handleDebugMessage}
+          onOverlayAddToThread={onOverlayAddToThread ?? null}
+          onOverlayAddLabel={onOverlayAddLabel ?? null}
         >
           {children}
         </MessageContextMenu>
@@ -404,6 +410,8 @@ export function TimelineMessage(props: Props): React.JSX.Element {
       toggleDeleteMessagesModal,
       toggleForwardMessagesModal,
       toggleSelectMessage,
+      onOverlayAddToThread,
+      onOverlayAddLabel,
     ]
   );
 

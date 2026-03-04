@@ -1,0 +1,53 @@
+// Copyright 2026 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
+// Overlay module public API barrel.
+// Import from this file for types and feature flag access.
+// Import directly from submodules for store operations (node-only).
+
+export type {
+  ThreadOverlayType,
+  MessageOverlayType,
+  CreateThreadOverlayInput,
+  UpdateThreadOverlayInput,
+  CreateMessageOverlayInput,
+  UpdateMessageOverlayInput,
+} from './models/OverlayTypes.std.js';
+
+export {
+  deriveMessageRef,
+  getMessageRef,
+  isPrimaryRef,
+} from './services/MessageRefAdapter.std.js';
+
+export type { MessageRefInput, MessageRefResult } from './services/MessageRefAdapter.std.js';
+
+export {
+  isOverlayThreadsEnabled,
+  setOverlayThreadsEnabled,
+  setOverlayThreadsEnabledForTesting,
+  isOverlayCloudSyncEnabled,
+  setOverlayCloudSyncEnabled,
+  setOverlayCloudSyncEnabledForTesting,
+  isOverlayIosSyncReady,
+  setOverlayIosSyncReady,
+  setOverlayIosSyncReadyForTesting,
+} from './OverlayFeatureFlag.std.js';
+
+export {
+  validateThreadOverlay,
+  validateMessageOverlay,
+  validateSyncRecord,
+  sanitizeForSync,
+} from './contract/OverlaySchemaValidator.std.js';
+
+export type { ValidationResult } from './contract/OverlaySchemaValidator.std.js';
+
+// Renderer-only exports (do not import in .node.ts files)
+export {
+  overlayEvents,
+  OverlayEventType,
+} from './services/OverlayEventBus.dom.js';
+
+export { overlayUndo } from './services/OverlayUndoManager.dom.js';
+export type { UndoEntry } from './services/OverlayUndoManager.dom.js';

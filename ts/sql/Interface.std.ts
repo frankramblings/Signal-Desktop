@@ -77,6 +77,15 @@ import type {
   RemoteMegaphoneId,
   RemoteMegaphoneType,
 } from '../types/Megaphone.std.js';
+import type {
+  ThreadOverlayType,
+  MessageOverlayType,
+  CreateThreadOverlayInput,
+  UpdateThreadOverlayInput,
+  CreateMessageOverlayInput,
+  UpdateMessageOverlayInput,
+} from '../overlay/models/OverlayTypes.std.js';
+import type { OverlaySyncState } from '../overlay/sync/OverlaySyncTypes.std.js';
 import { sqlFragment, sqlId, sqlJoin } from './util.std.js';
 import type { MIMEType } from '../types/MIME.std.js';
 
@@ -1102,6 +1111,34 @@ type ReadableInterface = {
   __dangerouslyRunAbitraryReadOnlySqlQuery: (
     readOnlySqlQuery: string
   ) => ReadonlyArray<RowType<object>>;
+
+  // Overlay thread reads
+  overlayGetThreadsByConversation: (
+    conversationRef: string
+  ) => ReadonlyArray<ThreadOverlayType>;
+  overlayGetThreadOverlay: (
+    threadRef: string
+  ) => ThreadOverlayType | undefined;
+  overlayGetMessageOverlayByRef: (
+    messageRef: string
+  ) => MessageOverlayType | undefined;
+  overlayGetMessageOverlaysByThread: (
+    threadRef: string
+  ) => ReadonlyArray<MessageOverlayType>;
+  overlayGetMessageOverlaysByConversation: (
+    conversationRef: string
+  ) => ReadonlyArray<MessageOverlayType>;
+
+  // Overlay sync reads (M3)
+  overlayGetThreadsDirtySince: (
+    sinceTimestamp: number
+  ) => ReadonlyArray<ThreadOverlayType>;
+  overlayGetMessagesDirtySince: (
+    sinceTimestamp: number
+  ) => ReadonlyArray<MessageOverlayType>;
+  overlayGetSyncState: (
+    deviceId: string
+  ) => OverlaySyncState | undefined;
 };
 
 type WritableInterface = {
@@ -1487,6 +1524,27 @@ type WritableInterface = {
   cleanExpiredGroupCallRingCancellations(): void;
 
   _testOnlyRemoveMessageAttachments(timestamp: number): void;
+
+  // Overlay thread writes
+  overlayCreateThread: (
+    input: CreateThreadOverlayInput
+  ) => ThreadOverlayType;
+  overlayUpdateThread: (
+    threadRef: string,
+    updates: UpdateThreadOverlayInput
+  ) => boolean;
+  overlayDeleteThread: (threadRef: string) => boolean;
+  overlayCreateMessageOverlay: (
+    input: CreateMessageOverlayInput
+  ) => MessageOverlayType;
+  overlayUpdateMessageOverlay: (
+    messageRef: string,
+    updates: UpdateMessageOverlayInput
+  ) => boolean;
+  overlayDeleteMessageOverlay: (messageRef: string) => boolean;
+
+  // Overlay sync writes (M3)
+  overlaySetSyncState: (state: OverlaySyncState) => void;
 };
 
 // Adds a database argument
