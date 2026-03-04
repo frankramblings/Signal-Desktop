@@ -33,10 +33,10 @@ export function isOverlayThreadsEnabled(): boolean {
     window.storage &&
     typeof window.storage.get === 'function'
   ) {
-    return window.storage.get(FLAG_KEY, false) === true;
+    return window.storage.get(FLAG_KEY, true) === true;
   }
 
-  return false;
+  return true;
 }
 
 /**
